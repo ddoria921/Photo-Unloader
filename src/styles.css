@@ -1,0 +1,53 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #09090b;
+  color: #fafafa;
+}
+
+.shell {
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.header {
+  margin-bottom: 1rem;
+}
+
+.card {
+  max-width: 720px;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #18181b;
+}
+
+button {
+  background: #fafafa;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.5;
+}
+
+.muted {
+  color: #a1a1aa;
+}
+
+.error {
+  color: #f87171;
+}
+
+.summary {
+  margin-top: 1rem;
+  border-top: 1px solid #27272a;
+  padding-top: 1rem;
+}
