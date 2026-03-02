@@ -28,14 +28,21 @@ body {
 
 button {
   background: #fafafa;
+  color: #111827;
   border: 0;
   border-radius: 8px;
   padding: 0.5rem 1rem;
   font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #e5e7eb;
 }
 
 button:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .muted {
