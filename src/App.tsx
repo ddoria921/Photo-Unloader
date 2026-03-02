@@ -1,25 +1,85 @@
-import { useState } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
-import { scanCard } from '@/lib/commands';
+import { isTauriRuntime, scanCard, scanFilesInBrowser } from '@/lib/commands';
 import type { ScanResult } from '@/types';
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes.toLocaleString()} B`;
+  }
+
+  const units = ['KB', 'MB', 'GB', 'TB'];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+
+  const decimals = value >= 100 ? 0 : value >= 10 ? 1 : 2;
+  return `${value.toFixed(decimals)} ${units[unitIndex]}`;
+}
 
 function App() {
   const [sourcePath, setSourcePath] = useState<string>('');
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onBrowse = async () => {
     setError(null);
-    const selected = await open({ directory: true, multiple: false });
-    if (!selected || typeof selected !== 'string') {
+    setScanResult(null);
+
+    if (!isTauriRuntime()) {
+      const fileInput = fileInputRef.current;
+      if (!fileInput) {
+        setError('Directory picker is not available.');
+        return;
+      }
+
+      fileInput.setAttribute('webkitdirectory', '');
+      fileInput.setAttribute('directory', '');
+      fileInput.click();
       return;
     }
 
-    setSourcePath(selected);
-    setLoading(true);
     try {
+      const selected = await open({ directory: true, multiple: false });
+      if (!selected || typeof selected !== 'string') {
+        return;
+      }
+
+      setSourcePath(selected);
+      setLoading(true);
       const result = await scanCard(selected);
+      setScanResult(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Scan failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSelectBrowserDirectory = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles: File[] = event.currentTarget.files
+      ? Array.from(event.currentTarget.files)
+      : [];
+    event.currentTarget.value = '';
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setScanResult(null);
+
+    try {
+      const rootFolder =
+        selectedFiles[0]?.webkitRelativePath.split('/').filter(Boolean)[0] ?? 'Selected folder';
+      setSourcePath(rootFolder);
+      const result = scanFilesInBrowser(selectedFiles);
       setScanResult(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Scan failed');
@@ -40,6 +100,13 @@ function App() {
         <button onClick={onBrowse} disabled={loading}>
           {loading ? 'Scanning…' : 'Browse…'}
         </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          hidden
+          multiple
+          onChange={onSelectBrowserDirectory}
+        />
 
         {sourcePath && <p className="muted">Source: {sourcePath}</p>}
         {error && <p className="error">{error}</p>}
@@ -53,7 +120,10 @@ function App() {
               <li>Video: {scanResult.videoCount}</li>
               <li>Unknown: {scanResult.unknownCount}</li>
             </ul>
-            <p>Total size: {scanResult.totalSizeBytes.toLocaleString()} bytes</p>
+            <p>
+              Total size: {formatBytes(scanResult.totalSizeBytes)} (
+              {scanResult.totalSizeBytes.toLocaleString()} bytes)
+            </p>
           </div>
         )}
       </section>
