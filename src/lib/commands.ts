@@ -1,5 +1,12 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { FileType, MediaFile, ScanResult } from '@/types';
+import type {
+  AppSettings,
+  FileType,
+  ImportSummary,
+  MediaFile,
+  ScanResult,
+  StartImportRequest
+} from '@/types';
 
 const JPG_EXTENSIONS = new Set(['jpg', 'jpeg', 'heic', 'png', 'tiff']);
 const RAW_EXTENSIONS = new Set(['cr2', 'cr3', 'nef', 'arw', 'orf', 'raf', 'dng', 'rw2']);
@@ -7,6 +14,22 @@ const VIDEO_EXTENSIONS = new Set(['mp4', 'mov', 'avi', 'mkv']);
 
 export async function scanCard(sourcePath: string): Promise<ScanResult> {
   return invoke<ScanResult>('scan_card', { sourcePath });
+}
+
+export async function startImport(request: StartImportRequest): Promise<ImportSummary> {
+  return invoke<ImportSummary>('start_import', { request });
+}
+
+export async function openInFinder(path: string): Promise<void> {
+  return invoke('open_in_finder', { path });
+}
+
+export async function getAppSettings(): Promise<AppSettings> {
+  return invoke<AppSettings>('get_app_settings');
+}
+
+export async function saveAppSettings(settings: AppSettings): Promise<AppSettings> {
+  return invoke<AppSettings>('save_app_settings', { settings });
 }
 
 export function isTauriRuntime(): boolean {

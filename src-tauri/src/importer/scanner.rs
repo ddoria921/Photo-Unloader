@@ -135,9 +135,21 @@ mod tests {
 
     #[test]
     fn classifies_extensions_case_insensitively() {
-        assert!(matches!(classify_file_type(Path::new("a.JPG")), FileType::Jpg));
-        assert!(matches!(classify_file_type(Path::new("a.cr3")), FileType::Raw));
-        assert!(matches!(classify_file_type(Path::new("a.MOV")), FileType::Video));
-        assert!(matches!(classify_file_type(Path::new("a.xyz")), FileType::Unknown));
+        assert!(matches!(
+            classify_file_type(Path::new("a.JPG")),
+            FileType::Jpg
+        ));
+        assert!(matches!(
+            classify_file_type(Path::new("a.cr3")),
+            FileType::Raw
+        ));
+        assert!(matches!(
+            classify_file_type(Path::new("a.MOV")),
+            FileType::Video
+        ));
+        assert!(matches!(
+            classify_file_type(Path::new("a.xyz")),
+            FileType::Unknown
+        ));
     }
 }
