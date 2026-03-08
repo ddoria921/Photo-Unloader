@@ -15,3 +15,49 @@ export interface ScanResult {
   unknownCount: number;
   totalSizeBytes: number;
 }
+
+export interface StartImportRequest {
+  sourcePath: string;
+  jpgDestination: string;
+  rawDestination: string;
+}
+
+export type ImportFileStatus =
+  | 'Copied'
+  | 'SkippedDuplicate'
+  | 'RenamedAndCopied'
+  | 'UnsupportedType'
+  | 'Error';
+
+export interface ImportProgressEvent {
+  totalFiles: number;
+  processedFiles: number;
+  copiedCount: number;
+  renamedCount: number;
+  skippedCount: number;
+  errorCount: number;
+  currentFile: string;
+  fileType: FileType;
+  status: ImportFileStatus;
+  message?: string | null;
+}
+
+export interface ImportSummary {
+  sourcePath: string;
+  jpgDestination: string;
+  rawDestination: string;
+  totalFiles: number;
+  copiedCount: number;
+  renamedCount: number;
+  skippedCount: number;
+  unsupportedCount: number;
+  errorCount: number;
+  completedWithErrors: boolean;
+}
+
+export interface AppSettings {
+  jpgDestination: string;
+  rawDestination: string;
+}
+
+export type AppView = 'source' | 'summary' | 'progress' | 'complete';

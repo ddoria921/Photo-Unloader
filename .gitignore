@@ -1,0 +1,49 @@
+# =========================
+# Tauri / Rust
+# =========================
+# Rust build artifacts
+target/
+**/target/
+
+# Tauri build outputs (bundles/installers)
+src-tauri/target/
+src-tauri/gen/
+
+# Cargo (keep lockfile for apps; ignore local caches)
+**/.cargo/
+.cargo/
+
+# =========================
+# Node / JS tooling
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
+.yarn/
+
+# Build outputs (common)
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.vite/
+
+# Caches
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache/
+.turbo/
+.nx/
+coverage/
+
+# Env files (adjust if you want to commit specific ones)
+.env
+.env.*
+!.env.example
