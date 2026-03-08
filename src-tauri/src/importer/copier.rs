@@ -44,18 +44,6 @@ pub fn copy_with_conflict_handling(source: &Path, destination: &Path) -> io::Res
 
     fs::copy(source, &final_destination)?;
 
-    let copied_hash = hasher::sha256_file(&final_destination)?;
-    if copied_hash != source_hash {
-        let _ = fs::remove_file(&final_destination);
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            format!(
-                "Copied file hash mismatch for destination: {}",
-                final_destination.display()
-            ),
-        ));
-    }
-
     Ok(CopyResult {
         status,
         destination_path: final_destination,
