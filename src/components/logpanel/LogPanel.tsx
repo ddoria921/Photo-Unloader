@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import type { ImportLogEntry } from '@/types';
 import { LogEntry } from './LogEntry';
 
@@ -39,7 +40,7 @@ export function LogPanel({ entries, errorCount, skippedCount }: LogPanelProps) {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`tab-btn${activeTab === tab.id ? ' active' : ''}`}
+            className={cn('tab-btn', activeTab === tab.id && 'active')}
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.label}

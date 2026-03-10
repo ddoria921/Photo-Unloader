@@ -23,18 +23,10 @@ export function FileTable({ rows, selectedIndex, phase, onRowSelect }: FileTable
     }
   }, [rows.length, phase]);
 
-  if (phase === 'idle') {
+  if (phase === 'idle' || phase === 'scanning') {
     return (
       <div className="file-table-area">
-        <FileTableEmpty scanning={false} />
-      </div>
-    );
-  }
-
-  if (phase === 'scanning') {
-    return (
-      <div className="file-table-area">
-        <FileTableEmpty scanning={true} />
+        <FileTableEmpty scanning={phase === 'scanning'} />
       </div>
     );
   }

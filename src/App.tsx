@@ -1,5 +1,7 @@
 import { isTauriRuntime } from '@/lib/commands';
 import { useAppState } from '@/hooks/useAppState';
+
+const IS_TAURI = isTauriRuntime();
 import { AppShell } from '@/components/layout/AppShell';
 import { TitleBar } from '@/components/layout/TitleBar';
 import { Sidebar } from '@/components/sidebar/Sidebar';
@@ -28,6 +30,9 @@ function App() {
     activeFilter,
     filteredRows,
     fileRows,
+    duplicateCount,
+    importedCount,
+    errorCount,
     importableCount,
     canStartImport,
     progressPercent,
@@ -52,14 +57,11 @@ function App() {
   const queueCount = scanResult
     ? scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount
     : 0;
-  const duplicateCount = fileRows.filter((r) => r.status === 'duplicate').length;
-  const importedCount = fileRows.filter((r) => r.status === 'copied').length;
-  const errorCount = fileRows.filter((r) => r.status === 'error').length;
   const skippedCount = progressState?.skippedCount ?? importSummary?.skippedCount ?? 0;
 
   return (
     <AppShell>
-      <TitleBar isConnected={isTauriRuntime()} />
+      <TitleBar isConnected={IS_TAURI} />
 
       <Sidebar
         phase={phase}

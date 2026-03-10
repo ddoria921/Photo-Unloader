@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import {
   getAppSettings,
@@ -102,6 +102,9 @@ export interface AppStateReturn {
   canStartImport: boolean;
   progressPercent: number;
   filteredRows: FileTableRow[];
+  duplicateCount: number;
+  importedCount: number;
+  errorCount: number;
   selectedFile: MediaFile | null;
 
   // Refs
@@ -447,7 +450,7 @@ export function useAppState(): AppStateReturn {
     ? Math.min(100, Math.round((progressState.processedFiles / progressState.totalFiles) * 100))
     : 0;
 
-  const filteredRows = fileRows.filter((row) => {
+  const filteredRows = useMemo(() => fileRows.filter((row) => {
     switch (activeFilter) {
       case 'raw':    return row.file.fileType === 'Raw';
       case 'jpg':    return row.file.fileType === 'Jpg';
@@ -456,7 +459,11 @@ export function useAppState(): AppStateReturn {
       case 'errors': return row.status === 'error';
       default:       return true;
     }
-  });
+  }), [fileRows, activeFilter]);
+
+  const duplicateCount = useMemo(() => fileRows.filter((r) => r.status === 'duplicate').length, [fileRows]);
+  const importedCount  = useMemo(() => fileRows.filter((r) => r.status === 'copied').length,    [fileRows]);
+  const errorCount     = useMemo(() => fileRows.filter((r) => r.status === 'error').length,      [fileRows]);
 
   const selectedFile = selectedFileIndex !== null ? fileRows[selectedFileIndex]?.file ?? null : null;
 
@@ -479,6 +486,9 @@ export function useAppState(): AppStateReturn {
     canStartImport,
     progressPercent,
     filteredRows,
+    duplicateCount,
+    importedCount,
+    errorCount,
     selectedFile,
     fileInputRef,
     toasts,

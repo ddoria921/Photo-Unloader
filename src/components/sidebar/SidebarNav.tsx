@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import type { FileFilter } from '@/types';
 
 interface SidebarNavProps {
@@ -42,7 +43,7 @@ export function SidebarNav({
           return (
             <div
               key={filter}
-              className={`nav-item${activeFilter === filter ? ' active' : ''}`}
+              className={cn('nav-item', activeFilter === filter && 'active')}
               onClick={() => onFilterChange(filter)}
             >
               <span className="nav-item-icon">{icon}</span>

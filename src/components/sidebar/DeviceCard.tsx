@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import { formatBytes } from '@/lib/utils';
+import { formatBytes, shortFileName } from '@/lib/utils';
 import type { DashboardPhase, ScanResult } from '@/types';
 
 interface DeviceCardProps {
@@ -10,12 +10,6 @@ interface DeviceCardProps {
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onBrowse: () => void;
   onSelectBrowserDirectory: (event: ChangeEvent<HTMLInputElement>) => void;
-}
-
-function deviceDisplayName(sourcePath: string): string {
-  const normalized = sourcePath.replace(/\\/g, '/').replace(/\/$/, '');
-  const parts = normalized.split('/').filter(Boolean);
-  return parts[parts.length - 1] ?? sourcePath;
 }
 
 export function DeviceCard({
@@ -35,7 +29,7 @@ export function DeviceCard({
 
       {hasSource ? (
         <div className="device-card">
-          <div className="device-name">{deviceDisplayName(sourcePath)}</div>
+          <div className="device-name">{shortFileName(sourcePath)}</div>
           <div className="device-meta">{sourcePath}</div>
           {scanResult && (
             <div className="device-meta">
