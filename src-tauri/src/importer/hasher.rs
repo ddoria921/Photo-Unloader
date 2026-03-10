@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{self, BufReader, Read};
 use std::path::Path;
 
-const HASH_BUFFER_SIZE: usize = 8192;
+const HASH_BUFFER_SIZE: usize = 262144;
 
 pub fn sha256_file(path: &Path) -> io::Result<String> {
     let file = File::open(path)?;

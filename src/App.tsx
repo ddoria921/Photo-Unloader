@@ -157,7 +157,6 @@ function App() {
   const [settingsDraft, setSettingsDraft] = useState<AppSettings>(EMPTY_SETTINGS);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nextToastIdRef = useRef(1);
-  const nextLogIdRef = useRef(1);
   const toastTimeoutsRef = useRef<Map<number, number>>(new Map());
   const importUnlistenRef = useRef<UnlistenFn[]>([]);
 
@@ -168,14 +167,19 @@ function App() {
     importUnlistenRef.current = [];
   };
 
-  const addImportLog = (entry: Omit<ImportLogEntry, 'id' | 'timestamp'>) => {
-    const nextId = nextLogIdRef.current;
-    nextLogIdRef.current += 1;
+  const resetScanState = () => {
+    setAppView('source');
+    setScanResult(null);
+    setProgressState(null);
+    setImportSummary(null);
+    setImportLog([]);
+  };
 
+  const addImportLog = (entry: Omit<ImportLogEntry, 'id' | 'timestamp'>) => {
     setImportLog((current) => [
       ...current,
       {
-        id: nextId,
+        id: current.length,
         level: entry.level,
         text: entry.text,
         timestamp: nowTimestamp()
@@ -261,11 +265,7 @@ function App() {
   }, []);
 
   const onBrowse = async () => {
-    setAppView('source');
-    setScanResult(null);
-    setProgressState(null);
-    setImportSummary(null);
-    setImportLog([]);
+    resetScanState();
 
     if (!isTauriRuntime()) {
       const fileInput = fileInputRef.current;
@@ -309,11 +309,7 @@ function App() {
     }
 
     setLoading(true);
-    setAppView('source');
-    setScanResult(null);
-    setProgressState(null);
-    setImportSummary(null);
-    setImportLog([]);
+    resetScanState();
 
     try {
       const rootFolder =
@@ -334,30 +330,25 @@ function App() {
     if (importing) {
       return;
     }
-    setAppView('source');
-    setScanResult(null);
-    setProgressState(null);
-    setImportSummary(null);
-    setImportLog([]);
+    resetScanState();
   };
 
   const onReset = () => {
     if (importing) {
       return;
     }
-    setAppView('source');
+    resetScanState();
     setSourcePath('');
-    setScanResult(null);
-    setProgressState(null);
-    setImportSummary(null);
-    setImportLog([]);
     setJpgDestination('');
     setRawDestination('');
     clearImportListeners();
   };
 
   const onImportAnother = async () => {
-    onReset();
+    setSourcePath('');
+    setJpgDestination('');
+    setRawDestination('');
+    clearImportListeners();
     await onBrowse();
   };
 
@@ -432,7 +423,6 @@ function App() {
       return;
     }
 
-    const importableCount = scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount;
     if (importableCount === 0) {
       showToast({
         title: 'Nothing to import',
@@ -497,16 +487,7 @@ function App() {
         });
       });
 
-      const unlistenComplete = await listen<ImportSummary>('import-complete', ({ payload }) => {
-        setImportSummary(payload);
-        setAppView('complete');
-        addImportLog({
-          level: payload.completedWithErrors ? 'warn' : 'info',
-          text: `Import completed. Copied ${payload.copiedCount}, skipped ${payload.skippedCount}, errors ${payload.errorCount}.`
-        });
-      });
-
-      importUnlistenRef.current = [unlistenProgress, unlistenComplete];
+      importUnlistenRef.current = [unlistenProgress];
 
       const summary = await startImport({
         sourcePath,
@@ -516,6 +497,10 @@ function App() {
 
       setImportSummary(summary);
       setAppView('complete');
+      addImportLog({
+        level: summary.completedWithErrors ? 'warn' : 'info',
+        text: `Import completed. Copied ${summary.copiedCount}, skipped ${summary.skippedCount}, errors ${summary.errorCount}.`
+      });
       showToast({
         title: summary.completedWithErrors ? 'Import finished with issues' : 'Import complete',
         description: `Copied ${summary.copiedCount}, skipped ${summary.skippedCount}, errors ${summary.errorCount}.`,
