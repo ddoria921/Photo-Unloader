@@ -13,12 +13,13 @@
     "windows": [
       {
         "title": "Photo Unloader",
-        "width": 980,
-        "height": 720,
-        "minWidth": 820,
-        "minHeight": 580,
+        "width": 1200,
+        "height": 740,
+        "minWidth": 900,
+        "minHeight": 600,
         "center": true,
-        "resizable": true
+        "resizable": true,
+        "decorations": false
       }
     ]
   },

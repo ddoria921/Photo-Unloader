@@ -60,4 +60,38 @@ export interface AppSettings {
   rawDestination: string;
 }
 
+/** @deprecated use DashboardPhase */
 export type AppView = 'source' | 'summary' | 'progress' | 'complete';
+
+// ── Dashboard state model ──────────────────────────────────────────────────
+
+export type DashboardPhase = 'idle' | 'scanning' | 'ready' | 'importing' | 'done';
+
+export type FileFilter = 'all' | 'raw' | 'jpg' | 'dupes' | 'new' | 'errors';
+
+export type LogPrefix = 'SCAN' | 'DUPE' | 'EXIF' | 'MOUNT' | 'IMPORT';
+
+export interface ImportLogEntry {
+  id: number;
+  level: 'info' | 'warn' | 'error';
+  prefix: LogPrefix;
+  text: string;
+  timestamp: string;
+}
+
+export type FileRowStatus = 'ready' | 'new' | 'duplicate' | 'copied' | 'error' | 'skipped';
+
+export interface FileTableRow {
+  file: MediaFile;
+  status: FileRowStatus;
+  destinationPath: string | null;
+}
+
+export interface ProgressState {
+  totalFiles: number;
+  processedFiles: number;
+  copiedCount: number;
+  renamedCount: number;
+  skippedCount: number;
+  errorCount: number;
+}
