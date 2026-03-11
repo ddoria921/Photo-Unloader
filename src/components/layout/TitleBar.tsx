@@ -14,25 +14,28 @@ function handleTrafficLight(action: 'close' | 'minimize' | 'maximize') {
 }
 
 export function TitleBar({ isConnected }: TitleBarProps) {
+  const isTauri = isTauriRuntime();
   return (
     <div className="titlebar" data-tauri-drag-region>
-      <div className="titlebar-traffic">
-        <button
-          className="titlebar-tl titlebar-tl-close"
-          onClick={() => handleTrafficLight('close')}
-          aria-label="Close"
-        />
-        <button
-          className="titlebar-tl titlebar-tl-min"
-          onClick={() => handleTrafficLight('minimize')}
-          aria-label="Minimize"
-        />
-        <button
-          className="titlebar-tl titlebar-tl-max"
-          onClick={() => handleTrafficLight('maximize')}
-          aria-label="Maximize"
-        />
-      </div>
+      {isTauri && (
+        <div className="titlebar-traffic">
+          <button
+            className="titlebar-tl titlebar-tl-close"
+            onClick={() => handleTrafficLight('close')}
+            aria-label="Close"
+          />
+          <button
+            className="titlebar-tl titlebar-tl-min"
+            onClick={() => handleTrafficLight('minimize')}
+            aria-label="Minimize"
+          />
+          <button
+            className="titlebar-tl titlebar-tl-max"
+            onClick={() => handleTrafficLight('maximize')}
+            aria-label="Maximize"
+          />
+        </div>
+      )}
 
       <span className="titlebar-name">Photo Unloader</span>
 
