@@ -10,6 +10,7 @@ interface ProgressPanelProps {
   scanResult: ScanResult | null;
   progressPercent: number;
   importableCount: number;
+  estimatedSecondsRemaining: number | null;
   onOpenInFinder: () => void;
   onImportAnother: () => void;
 }
@@ -25,6 +26,11 @@ function getStatusLabel(phase: DashboardPhase): string {
   }
 }
 
+function formatEta(seconds: number): string {
+  if (seconds < 60) return `~${seconds}s`;
+  return `~${Math.ceil(seconds / 60)} min`;
+}
+
 export function ProgressPanel({
   phase,
   progressState,
@@ -32,6 +38,7 @@ export function ProgressPanel({
   scanResult,
   progressPercent,
   importableCount,
+  estimatedSecondsRemaining,
   onOpenInFinder,
   onImportAnother
 }: ProgressPanelProps) {
@@ -78,6 +85,12 @@ export function ProgressPanel({
           <div className="progress-meta-row">
             <span className="progress-meta-label">Progress</span>
             <span className="progress-meta-val">{progressPercent}%</span>
+          </div>
+        )}
+        {phase === 'importing' && estimatedSecondsRemaining !== null && estimatedSecondsRemaining > 0 && (
+          <div className="progress-meta-row">
+            <span className="progress-meta-label">Est. Time</span>
+            <span className="progress-meta-val">{formatEta(estimatedSecondsRemaining)}</span>
           </div>
         )}
       </div>

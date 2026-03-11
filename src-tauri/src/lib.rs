@@ -12,7 +12,9 @@ pub fn run() {
             commands::import::start_import,
             commands::import::open_in_finder,
             commands::settings::get_app_settings,
-            commands::settings::save_app_settings
+            commands::settings::save_app_settings,
+            commands::settings::get_sessions,
+            commands::settings::save_session
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

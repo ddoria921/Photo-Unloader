@@ -6,7 +6,9 @@ interface FileTableRowProps {
   row: FileTableRowData;
   index: number;
   isSelected: boolean;
+  isExcluded: boolean;
   onSelect: (index: number) => void;
+  onToggleExclusion: (path: string) => void;
 }
 
 function getExtBadgeClass(fileType: FileType): string {
@@ -35,9 +37,10 @@ function getStatusBadge(status: FileTableRowData['status']): { label: string; cl
   }
 }
 
-function getRowClass(row: FileTableRowData, isSelected: boolean): string {
+function getRowClass(row: FileTableRowData, isSelected: boolean, isExcluded: boolean): string {
   return cn(
     isSelected && 'row-selected',
+    isExcluded && 'row-excluded',
     row.status === 'duplicate' && 'row-duplicate',
     row.status === 'error' && 'row-error'
   );
@@ -48,7 +51,7 @@ function getBaseName(filename: string): string {
   return lastDot > 0 ? filename.slice(0, lastDot) : filename;
 }
 
-export function FileTableRow({ row, index, isSelected, onSelect }: FileTableRowProps) {
+export function FileTableRow({ row, index, isSelected, isExcluded, onSelect, onToggleExclusion }: FileTableRowProps) {
   const { file, status, destinationPath } = row;
   const { label: statusLabel, cls: statusCls } = getStatusBadge(status);
   const extLabel = getExtLabel(file.filename);
@@ -56,15 +59,14 @@ export function FileTableRow({ row, index, isSelected, onSelect }: FileTableRowP
 
   return (
     <tr
-      className={getRowClass(row, isSelected)}
+      className={getRowClass(row, isSelected, isExcluded)}
       onClick={() => onSelect(index)}
     >
       <td className="check-cell">
-        {/* TODO: selective import requires backend changes */}
         <input
           type="checkbox"
-          checked={status !== 'duplicate' && status !== 'skipped'}
-          readOnly
+          checked={!isExcluded}
+          onChange={() => onToggleExclusion(file.path)}
           onClick={(e) => e.stopPropagation()}
         />
       </td>
@@ -85,7 +87,20 @@ export function FileTableRow({ row, index, isSelected, onSelect }: FileTableRowP
       </td>
 
       <td>
-        <span className="meta-text">—</span>
+        <span className="meta-text">{file.capturedAt ? file.capturedAt.slice(0, 10) : '—'}</span>
+      </td>
+
+      <td>
+        <span className="meta-text">
+          {file.cameraModel ?? file.cameraMake ?? '—'}
+        </span>
+      </td>
+
+      <td>
+        <span className="meta-text exposure-cell">
+          {[file.aperture, file.shutterSpeed, file.iso != null ? `ISO${file.iso}` : null]
+            .filter(Boolean).join(' ') || '—'}
+        </span>
       </td>
 
       <td>
@@ -95,7 +110,14 @@ export function FileTableRow({ row, index, isSelected, onSelect }: FileTableRowP
       <td>
         {destinationPath ? (
           <span className="dest-path-cell">
-            <span className="dest-segment">{destinationPath}</span>
+            {row.destinationBase && destinationPath !== row.destinationBase ? (
+              <>
+                <span className="dest-segment-base">{row.destinationBase}</span>
+                <span className="dest-segment-sub">{destinationPath.slice(row.destinationBase.length)}</span>
+              </>
+            ) : (
+              <span className="dest-segment">{destinationPath}</span>
+            )}
           </span>
         ) : (
           <span className="dest-path-cell">—</span>

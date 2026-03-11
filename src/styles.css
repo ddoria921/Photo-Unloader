@@ -53,6 +53,7 @@ body {
   line-height: 1.45;
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
 button {
@@ -427,6 +428,50 @@ input {
   font-style: italic;
 }
 
+.session-list { display: flex; flex-direction: column; gap: 1px; }
+
+.session-item {
+  padding: 6px 14px;
+  cursor: default;
+  border-left: 2px solid transparent;
+  transition: background 0.1s;
+}
+.session-item:hover { background: var(--bg-panel-alt); }
+.session-item-warn  { border-left-color: var(--orange); }
+
+.session-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px;
+}
+.session-source {
+  font-size: 11px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+.session-date {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.session-item-stats {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.session-stat {
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+.session-stat-ok   { color: var(--green); }
+.session-stat-dim  { color: var(--text-dim); }
+.session-stat-err  { color: var(--red); }
+
 /* Sidebar spacer + footer */
 .sidebar-spacer {
   flex: 1;
@@ -672,14 +717,28 @@ input {
   user-select: none;
 }
 
-.file-table th.col-check  { width: 28px; }
-.file-table th.col-thumb  { width: 44px; }
-.file-table th.col-name   { width: auto; }
-.file-table th.col-type   { width: 62px; }
-.file-table th.col-date   { width: 120px; }
-.file-table th.col-size   { width: 70px; }
-.file-table th.col-dest   { width: 180px; }
-.file-table th.col-status { width: 80px; }
+.file-table th.col-check    { width: 28px; }
+.file-table th.col-thumb    { width: 44px; }
+.file-table th.col-name     { width: auto; }
+.file-table th.col-type     { width: 56px; }
+.file-table th.col-date     { width: 100px; }
+.file-table th.col-camera   { width: 110px; }
+.file-table th.col-exposure { width: 120px; }
+.file-table th.col-size     { width: 66px; }
+.file-table th.col-dest     { width: 150px; }
+.file-table th.col-status   { width: 76px; }
+
+.exposure-cell { letter-spacing: -0.01em; }
+
+.col-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.col-sortable:hover { color: var(--text-primary); }
+
+.sort-indicator { margin-left: 3px; font-size: 9px; }
+.sort-indicator-idle   { color: var(--text-dim); }
+.sort-indicator-active { color: var(--accent); }
 
 .file-table td {
   padding: 5px 8px;
@@ -704,6 +763,8 @@ input {
 .file-table tbody tr.row-selected td { background: var(--bg-row-selected); }
 
 .file-table tbody tr.row-duplicate { opacity: 0.42; }
+
+.file-table tbody tr.row-excluded { opacity: 0.35; }
 
 .file-table tbody tr.row-error td { background: var(--red-dim); }
 
@@ -802,7 +863,9 @@ input {
   white-space: nowrap;
 }
 
-.dest-path-cell .dest-segment { color: var(--text-secondary); }
+.dest-path-cell .dest-segment      { color: var(--text-secondary); }
+.dest-path-cell .dest-segment-base { color: var(--text-dim); }
+.dest-path-cell .dest-segment-sub  { color: var(--text-secondary); }
 
 /* Status badges */
 .status-badge {
@@ -1157,6 +1220,7 @@ input {
 .log-prefix-import { background: rgba(76, 175, 125, 0.15); color: #7ae0b0; }
 .log-prefix-mount  { background: rgba(232, 146, 90, 0.15); color: #e8ad7a; }
 .log-prefix-exif   { background: rgba(180, 130, 240, 0.15); color: #c0a0e8; }
+.log-prefix-nas    { background: rgba(232, 197, 71, 0.15);  color: #e8c547; }
 
 .log-text {
   font-family: var(--font-mono);
@@ -1170,6 +1234,10 @@ input {
 
 .log-text-warn  { color: #d4a848; }
 .log-text-error { color: var(--red); }
+
+.log-hl-path { color: var(--blue); }
+.log-hl-ok   { color: var(--green); }
+.log-hl-warn { color: var(--orange); }
 
 /* ── PROGRESS PANEL ──────────────────────────────────────────────────────── */
 .progress-col {

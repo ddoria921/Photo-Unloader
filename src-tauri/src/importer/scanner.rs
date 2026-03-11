@@ -1,3 +1,4 @@
+use super::exif::read_media_exif;
 use serde::Serialize;
 use std::ffi::OsStr;
 use std::io;
@@ -24,6 +25,17 @@ pub struct MediaFile {
     pub file_type: FileType,
     pub size_bytes: u64,
     pub filename: String,
+    pub captured_at: Option<String>,
+    pub camera_make: Option<String>,
+    pub camera_model: Option<String>,
+    pub aperture: Option<String>,
+    pub shutter_speed: Option<String>,
+    pub iso: Option<u32>,
+    pub focal_length: Option<String>,
+    pub lens: Option<String>,
+    pub white_balance: Option<String>,
+    pub sha256: Option<String>,
+    pub paired_file: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -86,12 +98,55 @@ pub fn scan_directory(source_dir: &Path) -> io::Result<ScanResult> {
 
         total_size_bytes += metadata.len();
 
+        let exif = match file_type {
+            FileType::Jpg | FileType::Raw => read_media_exif(&path),
+            _ => Default::default(),
+        };
+
         files.push(MediaFile {
             path,
             file_type,
             size_bytes: metadata.len(),
             filename,
+            captured_at: exif.captured_at,
+            camera_make: exif.camera_make,
+            camera_model: exif.camera_model,
+            aperture: exif.aperture,
+            shutter_speed: exif.shutter_speed,
+            iso: exif.iso,
+            focal_length: exif.focal_length,
+            lens: exif.lens,
+            white_balance: exif.white_balance,
+            sha256: None, // computed during import, not scan
+            paired_file: None, // populated after full scan
         });
+    }
+
+    // Detect RAW/JPG pairs by matching base filenames
+    let base_to_indices: std::collections::HashMap<String, Vec<usize>> = {
+        let mut map: std::collections::HashMap<String, Vec<usize>> = std::collections::HashMap::new();
+        for (i, f) in files.iter().enumerate() {
+            let base = Path::new(&f.filename)
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("")
+                .to_ascii_lowercase();
+            map.entry(base).or_default().push(i);
+        }
+        map
+    };
+
+    for indices in base_to_indices.values() {
+        if indices.len() < 2 { continue; }
+        // Find if there's both a RAW and a JPG/video in this group
+        let raw_idx = indices.iter().find(|&&i| matches!(files[i].file_type, FileType::Raw));
+        let jpg_idx = indices.iter().find(|&&i| matches!(files[i].file_type, FileType::Jpg));
+        if let (Some(&ri), Some(&ji)) = (raw_idx, jpg_idx) {
+            let jpg_name = files[ji].filename.clone();
+            let raw_name = files[ri].filename.clone();
+            files[ri].paired_file = Some(jpg_name);
+            files[ji].paired_file = Some(raw_name);
+        }
     }
 
     Ok(ScanResult {

@@ -5,6 +5,17 @@ export interface MediaFile {
   fileType: FileType;
   sizeBytes: number;
   filename: string;
+  capturedAt: string | null;
+  cameraMake: string | null;
+  cameraModel: string | null;
+  aperture: string | null;
+  shutterSpeed: string | null;
+  iso: number | null;
+  focalLength: string | null;
+  lens: string | null;
+  whiteBalance: string | null;
+  sha256: string | null;
+  pairedFile: string | null;
 }
 
 export interface ScanResult {
@@ -60,6 +71,19 @@ export interface AppSettings {
   rawDestination: string;
 }
 
+export interface SessionRecord {
+  id: string;
+  completedAt: string;
+  sourcePath: string;
+  jpgDestination: string;
+  rawDestination: string;
+  totalFiles: number;
+  copiedCount: number;
+  skippedCount: number;
+  errorCount: number;
+  completedWithErrors: boolean;
+}
+
 /** @deprecated use DashboardPhase */
 export type AppView = 'source' | 'summary' | 'progress' | 'complete';
 
@@ -69,7 +93,10 @@ export type DashboardPhase = 'idle' | 'scanning' | 'ready' | 'importing' | 'done
 
 export type FileFilter = 'all' | 'raw' | 'jpg' | 'dupes' | 'new' | 'errors';
 
-export type LogPrefix = 'SCAN' | 'DUPE' | 'EXIF' | 'MOUNT' | 'IMPORT';
+export type SortKey = 'filename' | 'type' | 'date' | 'size' | 'status';
+export type SortDir = 'asc' | 'desc';
+
+export type LogPrefix = 'SCAN' | 'DUPE' | 'EXIF' | 'MOUNT' | 'IMPORT' | 'NAS';
 
 export interface ImportLogEntry {
   id: number;
@@ -85,6 +112,7 @@ export interface FileTableRow {
   file: MediaFile;
   status: FileRowStatus;
   destinationPath: string | null;
+  destinationBase: string | null;
 }
 
 export interface ProgressState {

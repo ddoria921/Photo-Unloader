@@ -34,6 +34,7 @@ function App() {
     importedCount,
     errorCount,
     importableCount,
+    selectedCount,
     canStartImport,
     progressPercent,
     selectedFile,
@@ -51,7 +52,13 @@ function App() {
     onJpgDestinationBlur,
     onRawDestinationBlur,
     onSelectFile,
-    onFilterChange
+    onFilterChange,
+    onSortChange,
+    onToggleFileExclusion,
+    onToggleAllFiles,
+    sortKey,
+    sortDir,
+    excludedFiles
   } = state;
 
   const queueCount = scanResult
@@ -84,6 +91,7 @@ function App() {
         onJpgBlur={onJpgDestinationBlur}
         onRawBlur={onRawDestinationBlur}
         onFilterChange={onFilterChange}
+        sessions={state.sessions}
       />
 
       <main className="main-area">
@@ -93,6 +101,7 @@ function App() {
           totalCount={fileRows.length}
           filteredCount={filteredRows.length}
           importableCount={importableCount}
+          selectedCount={selectedCount}
           phase={phase}
           importing={importing}
           loading={loading}
@@ -108,6 +117,12 @@ function App() {
               : null
           }
           phase={phase}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          excludedFiles={excludedFiles}
+          onSortChange={onSortChange}
+          onToggleFileExclusion={onToggleFileExclusion}
+          onToggleAllFiles={onToggleAllFiles}
           onRowSelect={(filteredIdx) => {
             const row = filteredRows[filteredIdx];
             if (row) {
@@ -137,6 +152,7 @@ function App() {
         scanResult={scanResult}
         progressPercent={progressPercent}
         importableCount={importableCount}
+        estimatedSecondsRemaining={state.estimatedSecondsRemaining}
         onOpenInFinder={onOpenInFinder}
         onImportAnother={onImportAnother}
       />

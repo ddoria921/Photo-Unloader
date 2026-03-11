@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { DashboardPhase, FileFilter, ScanResult } from '@/types';
+import type { DashboardPhase, FileFilter, ScanResult, SessionRecord } from '@/types';
 import { DeviceCard } from './DeviceCard';
 import { DestinationSection } from './DestinationSection';
 import { SidebarNav } from './SidebarNav';
@@ -27,6 +27,7 @@ interface SidebarProps {
   onJpgBlur: () => void;
   onRawBlur: () => void;
   onFilterChange: (filter: FileFilter) => void;
+  sessions: SessionRecord[];
 }
 
 export function Sidebar({
@@ -49,7 +50,8 @@ export function Sidebar({
   onRawChange,
   onJpgBlur,
   onRawBlur,
-  onFilterChange
+  onFilterChange,
+  sessions
 }: SidebarProps) {
   return (
     <aside className="sidebar">
@@ -82,7 +84,7 @@ export function Sidebar({
         onRawBlur={onRawBlur}
       />
 
-      <SessionHistory />
+      <SessionHistory sessions={sessions} />
 
       <div className="sidebar-spacer" />
 

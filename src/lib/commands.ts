@@ -5,6 +5,7 @@ import type {
   ImportSummary,
   MediaFile,
   ScanResult,
+  SessionRecord,
   StartImportRequest
 } from '@/types';
 
@@ -30,6 +31,14 @@ export async function getAppSettings(): Promise<AppSettings> {
 
 export async function saveAppSettings(settings: AppSettings): Promise<AppSettings> {
   return invoke<AppSettings>('save_app_settings', { settings });
+}
+
+export async function getSessions(): Promise<SessionRecord[]> {
+  return invoke<SessionRecord[]>('get_sessions');
+}
+
+export async function saveSession(record: SessionRecord): Promise<void> {
+  return invoke('save_session', { record });
 }
 
 export function isTauriRuntime(): boolean {
@@ -72,7 +81,18 @@ export function scanFilesInBrowser(files: File[]): ScanResult {
       path: relativePath,
       fileType,
       sizeBytes: file.size,
-      filename: file.name
+      filename: file.name,
+      capturedAt: null,
+      cameraMake: null,
+      cameraModel: null,
+      aperture: null,
+      shutterSpeed: null,
+      iso: null,
+      focalLength: null,
+      lens: null,
+      whiteBalance: null,
+      sha256: null,
+      pairedFile: null
     });
   }
 

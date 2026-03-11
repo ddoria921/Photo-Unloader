@@ -7,6 +7,7 @@ interface ToolbarProps {
   totalCount: number;
   filteredCount: number;
   importableCount: number;
+  selectedCount: number;
   phase: DashboardPhase;
   importing: boolean;
   loading: boolean;
@@ -21,6 +22,7 @@ export function Toolbar({
   totalCount,
   filteredCount,
   importableCount,
+  selectedCount,
   phase,
   importing,
   loading,
@@ -29,6 +31,7 @@ export function Toolbar({
   onStartImport
 }: ToolbarProps) {
   const showCount = totalCount > 0;
+  const hasSelection = selectedCount > 0 && selectedCount < totalCount;
 
   return (
     <div className="toolbar">
@@ -49,9 +52,11 @@ export function Toolbar({
       {showCount && (
         <>
           <span className="toolbar-count">
-            {filteredCount !== totalCount
-              ? `${filteredCount.toLocaleString()} of ${totalCount.toLocaleString()}`
-              : `${totalCount.toLocaleString()} files`}
+            {hasSelection
+              ? `${selectedCount.toLocaleString()} selected · ${totalCount.toLocaleString()} total`
+              : filteredCount !== totalCount
+                ? `${filteredCount.toLocaleString()} of ${totalCount.toLocaleString()}`
+                : `${totalCount.toLocaleString()} files`}
           </span>
           <div className="toolbar-sep" />
         </>
