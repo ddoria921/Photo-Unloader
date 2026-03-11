@@ -51,7 +51,7 @@ export function FileTable({ rows, selectedIndex, phase, sortKey, sortDir, exclud
               <th className="col-check">
                 <input
                   type="checkbox"
-                  checked={rows.length > 0 && excludedFiles.size === 0}
+                  checked={rows.length > 0 && rows.every((r) => !excludedFiles.has(r.file.path))}
                   onChange={onToggleAllFiles}
                 />
               </th>

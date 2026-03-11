@@ -28,12 +28,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function getFileTypeLabel(file: MediaFile): string {
   switch (file.fileType) {
-    case 'Raw':   {
+    case 'raw':   {
       const ext = file.filename.split('.').pop()?.toUpperCase();
       return ext ? `${ext} RAW` : 'RAW';
     }
-    case 'Jpg':   return 'JPEG';
-    case 'Video': return 'Video';
+    case 'jpg':   return 'JPEG';
+    case 'video': return 'Video';
     default:      return 'Unknown';
   }
 }
@@ -41,9 +41,9 @@ function getFileTypeLabel(file: MediaFile): string {
 function getDestination(file: MediaFile, jpgDest: string, rawDest: string): string {
   if (!jpgDest && !rawDest) return '—';
   switch (file.fileType) {
-    case 'Jpg':   return jpgDest || '—';
-    case 'Raw':   return rawDest || '—';
-    case 'Video': return jpgDest || '—';
+    case 'jpg':   return jpgDest || '—';
+    case 'raw':   return rawDest || '—';
+    case 'video': return jpgDest || '—';
     default:      return '—';
   }
 }

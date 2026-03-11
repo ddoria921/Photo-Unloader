@@ -1,4 +1,4 @@
-export type FileType = 'Jpg' | 'Raw' | 'Video' | 'Unknown';
+export type FileType = 'jpg' | 'raw' | 'video' | 'unknown';
 
 export interface MediaFile {
   path: string;
@@ -31,6 +31,7 @@ export interface StartImportRequest {
   sourcePath: string;
   jpgDestination: string;
   rawDestination: string;
+  filePaths?: string[];
 }
 
 export type ImportFileStatus =

@@ -10,8 +10,8 @@ export function PhotoPreview({ file }: PhotoPreviewProps) {
       <div className="inspector-preview-placeholder">
         <span className="inspector-preview-icon">⬡</span>
         <span className="inspector-preview-label">
-          {file.fileType === 'Raw' ? 'RAW · No Preview' :
-           file.fileType === 'Video' ? 'Video · No Preview' :
+          {file.fileType === 'raw' ? 'RAW · No Preview' :
+           file.fileType === 'video' ? 'Video · No Preview' :
            'No Preview'}
         </span>
       </div>

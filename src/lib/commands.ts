@@ -63,13 +63,13 @@ export function scanFilesInBrowser(files: File[]): ScanResult {
     totalSizeBytes += file.size;
 
     switch (fileType) {
-      case 'Jpg':
+      case 'jpg':
         jpgCount += 1;
         break;
-      case 'Raw':
+      case 'raw':
         rawCount += 1;
         break;
-      case 'Video':
+      case 'video':
         videoCount += 1;
         break;
       default:
@@ -108,23 +108,11 @@ export function scanFilesInBrowser(files: File[]): ScanResult {
 
 function classifyFileType(filename: string): FileType {
   const extension = filename.split('.').pop()?.toLowerCase();
-  if (!extension) {
-    return 'Unknown';
-  }
-
-  if (JPG_EXTENSIONS.has(extension)) {
-    return 'Jpg';
-  }
-
-  if (RAW_EXTENSIONS.has(extension)) {
-    return 'Raw';
-  }
-
-  if (VIDEO_EXTENSIONS.has(extension)) {
-    return 'Video';
-  }
-
-  return 'Unknown';
+  if (!extension) return 'unknown';
+  if (JPG_EXTENSIONS.has(extension)) return 'jpg';
+  if (RAW_EXTENSIONS.has(extension)) return 'raw';
+  if (VIDEO_EXTENSIONS.has(extension)) return 'video';
+  return 'unknown';
 }
 
 function isHiddenPath(relativePath: string): boolean {

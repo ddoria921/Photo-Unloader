@@ -1,3 +1,7 @@
+import { isTauriRuntime } from '@/lib/commands';
+
+const IS_TAURI = isTauriRuntime();
+
 interface DestinationSectionProps {
   jpgDestination: string;
   rawDestination: string;
@@ -6,6 +10,53 @@ interface DestinationSectionProps {
   onRawChange: (value: string) => void;
   onJpgBlur: () => void;
   onRawBlur: () => void;
+  onJpgBrowse: () => void;
+  onRawBrowse: () => void;
+}
+
+function DestField({
+  label,
+  value,
+  placeholder,
+  disabled,
+  onChange,
+  onBlur,
+  onBrowse,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  disabled: boolean;
+  onChange: (v: string) => void;
+  onBlur: () => void;
+  onBrowse: () => void;
+}) {
+  return (
+    <div className="dest-field">
+      <span className="dest-field-label">{label}</span>
+      {IS_TAURI ? (
+        <button
+          className="dest-pick-btn"
+          onClick={onBrowse}
+          disabled={disabled}
+          title={value || placeholder}
+        >
+          <span className="dest-pick-path">{value || <span className="dest-pick-placeholder">{placeholder}</span>}</span>
+          <span className="dest-pick-icon">⌄</span>
+        </button>
+      ) : (
+        <input
+          className="dest-input"
+          type="text"
+          value={value}
+          placeholder={placeholder}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+        />
+      )}
+    </div>
+  );
 }
 
 export function DestinationSection({
@@ -15,36 +66,32 @@ export function DestinationSection({
   onJpgChange,
   onRawChange,
   onJpgBlur,
-  onRawBlur
+  onRawBlur,
+  onJpgBrowse,
+  onRawBrowse,
 }: DestinationSectionProps) {
   return (
     <div className="sidebar-section">
       <span className="sidebar-section-label">Destination</span>
       <div className="dest-section">
-        <div className="dest-field">
-          <span className="dest-field-label">JPG</span>
-          <input
-            className="dest-input"
-            type="text"
-            value={jpgDestination}
-            placeholder="/Volumes/NAS/JPG"
-            disabled={disabled}
-            onChange={(e) => onJpgChange(e.target.value)}
-            onBlur={onJpgBlur}
-          />
-        </div>
-        <div className="dest-field">
-          <span className="dest-field-label">RAW</span>
-          <input
-            className="dest-input"
-            type="text"
-            value={rawDestination}
-            placeholder="/Volumes/NAS/RAW"
-            disabled={disabled}
-            onChange={(e) => onRawChange(e.target.value)}
-            onBlur={onRawBlur}
-          />
-        </div>
+        <DestField
+          label="JPG"
+          value={jpgDestination}
+          placeholder="Choose folder…"
+          disabled={disabled}
+          onChange={onJpgChange}
+          onBlur={onJpgBlur}
+          onBrowse={onJpgBrowse}
+        />
+        <DestField
+          label="RAW"
+          value={rawDestination}
+          placeholder="Choose folder…"
+          disabled={disabled}
+          onChange={onRawChange}
+          onBlur={onRawBlur}
+          onBrowse={onRawBrowse}
+        />
       </div>
     </div>
   );

@@ -26,6 +26,8 @@ interface SidebarProps {
   onRawChange: (value: string) => void;
   onJpgBlur: () => void;
   onRawBlur: () => void;
+  onJpgBrowse: () => void;
+  onRawBrowse: () => void;
   onFilterChange: (filter: FileFilter) => void;
   sessions: SessionRecord[];
 }
@@ -50,6 +52,8 @@ export function Sidebar({
   onRawChange,
   onJpgBlur,
   onRawBlur,
+  onJpgBrowse,
+  onRawBrowse,
   onFilterChange,
   sessions
 }: SidebarProps) {
@@ -82,6 +86,8 @@ export function Sidebar({
         onRawChange={onRawChange}
         onJpgBlur={onJpgBlur}
         onRawBlur={onRawBlur}
+        onJpgBrowse={onJpgBrowse}
+        onRawBrowse={onRawBrowse}
       />
 
       <SessionHistory sessions={sessions} />

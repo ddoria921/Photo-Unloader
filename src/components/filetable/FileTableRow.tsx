@@ -13,9 +13,9 @@ interface FileTableRowProps {
 
 function getExtBadgeClass(fileType: FileType): string {
   switch (fileType) {
-    case 'Raw':   return 'ext-badge ext-badge-raw';
-    case 'Jpg':   return 'ext-badge ext-badge-jpg';
-    case 'Video': return 'ext-badge ext-badge-vid';
+    case 'raw':   return 'ext-badge ext-badge-raw';
+    case 'jpg':   return 'ext-badge ext-badge-jpg';
+    case 'video': return 'ext-badge ext-badge-vid';
     default:      return 'ext-badge';
   }
 }
@@ -72,7 +72,7 @@ export function FileTableRow({ row, index, isSelected, isExcluded, onSelect, onT
       </td>
 
       <td>
-        <div className="thumb-placeholder">{file.fileType === 'Raw' ? 'RAW' : file.fileType === 'Video' ? 'VID' : 'JPG'}</div>
+        <div className="thumb-placeholder">{file.fileType === 'raw' ? 'RAW' : file.fileType === 'video' ? 'VID' : 'JPG'}</div>
       </td>
 
       <td>
