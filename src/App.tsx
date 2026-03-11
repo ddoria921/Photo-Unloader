@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { isTauriRuntime } from '@/lib/commands';
 import { useAppState } from '@/hooks/useAppState';
 
@@ -14,6 +15,9 @@ import { Toaster } from '@/components/ui/toaster';
 
 function App() {
   const state = useAppState();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [bottomOpen, setBottomOpen] = useState(true);
 
   const {
     phase,
@@ -51,6 +55,8 @@ function App() {
     onRawDestinationChange,
     onJpgDestinationBlur,
     onRawDestinationBlur,
+    onBrowseJpgDestination,
+    onBrowseRawDestination,
     onSelectFile,
     onFilterChange,
     onSortChange,
@@ -67,8 +73,20 @@ function App() {
   const skippedCount = progressState?.skippedCount ?? importSummary?.skippedCount ?? 0;
 
   return (
-    <AppShell>
-      <TitleBar isConnected={IS_TAURI} />
+    <AppShell
+      sidebarCollapsed={!sidebarOpen}
+      inspectorCollapsed={!inspectorOpen}
+      bottomCollapsed={!bottomOpen}
+    >
+      <TitleBar
+        isConnected={IS_TAURI}
+        sidebarOpen={sidebarOpen}
+        inspectorOpen={inspectorOpen}
+        bottomOpen={bottomOpen}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        onToggleInspector={() => setInspectorOpen((v) => !v)}
+        onToggleBottom={() => setBottomOpen((v) => !v)}
+      />
 
       <Sidebar
         phase={phase}
@@ -90,6 +108,8 @@ function App() {
         onRawChange={onRawDestinationChange}
         onJpgBlur={onJpgDestinationBlur}
         onRawBlur={onRawDestinationBlur}
+        onJpgBrowse={onBrowseJpgDestination}
+        onRawBrowse={onBrowseRawDestination}
         onFilterChange={onFilterChange}
         sessions={state.sessions}
       />

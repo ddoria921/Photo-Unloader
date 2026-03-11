@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Photo Unloader",
@@ -19,7 +20,8 @@
         "minHeight": 600,
         "center": true,
         "resizable": true,
-        "decorations": false
+        "decorations": false,
+        "transparent": true
       }
     ]
   },

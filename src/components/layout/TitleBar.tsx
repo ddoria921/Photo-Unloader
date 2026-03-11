@@ -3,6 +3,12 @@ import { isTauriRuntime } from '@/lib/commands';
 
 interface TitleBarProps {
   isConnected: boolean;
+  sidebarOpen: boolean;
+  inspectorOpen: boolean;
+  bottomOpen: boolean;
+  onToggleSidebar: () => void;
+  onToggleInspector: () => void;
+  onToggleBottom: () => void;
 }
 
 function handleTrafficLight(action: 'close' | 'minimize' | 'maximize') {
@@ -13,7 +19,15 @@ function handleTrafficLight(action: 'close' | 'minimize' | 'maximize') {
   else if (action === 'maximize') void win.toggleMaximize();
 }
 
-export function TitleBar({ isConnected }: TitleBarProps) {
+export function TitleBar({
+  isConnected,
+  sidebarOpen,
+  inspectorOpen,
+  bottomOpen,
+  onToggleSidebar,
+  onToggleInspector,
+  onToggleBottom,
+}: TitleBarProps) {
   const isTauri = isTauriRuntime();
   return (
     <div className="titlebar" data-tauri-drag-region>
@@ -40,6 +54,48 @@ export function TitleBar({ isConnected }: TitleBarProps) {
       <span className="titlebar-name">Photo Unloader</span>
 
       <div className="titlebar-right">
+        <div className="panel-toggle-group" role="group" aria-label="Toggle panels">
+          <button
+            className={`panel-toggle-btn${sidebarOpen ? ' panel-toggle-btn--active' : ''}`}
+            onClick={onToggleSidebar}
+            aria-pressed={sidebarOpen}
+            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+          >
+            {/* Left sidebar */}
+            <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0.6" y="0.6" width="14.8" height="12.8" rx="1.4" stroke="currentColor" strokeWidth="1.2"/>
+              <rect x="0.6" y="0.6" width="4.8" height="12.8" rx="1.4" fill="currentColor" fillOpacity="0.35"/>
+              <line x1="5.4" y1="0.6" x2="5.4" y2="13.4" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+          </button>
+          <button
+            className={`panel-toggle-btn${bottomOpen ? ' panel-toggle-btn--active' : ''}`}
+            onClick={onToggleBottom}
+            aria-pressed={bottomOpen}
+            title={bottomOpen ? 'Hide log panel' : 'Show log panel'}
+          >
+            {/* Bottom panel */}
+            <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0.6" y="0.6" width="14.8" height="12.8" rx="1.4" stroke="currentColor" strokeWidth="1.2"/>
+              <rect x="0.6" y="8.6" width="14.8" height="4.8" rx="1.4" fill="currentColor" fillOpacity="0.35"/>
+              <line x1="0.6" y1="8.6" x2="15.4" y2="8.6" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+          </button>
+          <button
+            className={`panel-toggle-btn${inspectorOpen ? ' panel-toggle-btn--active' : ''}`}
+            onClick={onToggleInspector}
+            aria-pressed={inspectorOpen}
+            title={inspectorOpen ? 'Hide inspector' : 'Show inspector'}
+          >
+            {/* Right sidebar */}
+            <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0.6" y="0.6" width="14.8" height="12.8" rx="1.4" stroke="currentColor" strokeWidth="1.2"/>
+              <rect x="10.6" y="0.6" width="4.8" height="12.8" rx="1.4" fill="currentColor" fillOpacity="0.35"/>
+              <line x1="10.6" y1="0.6" x2="10.6" y2="13.4" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+          </button>
+        </div>
+
         {isConnected ? (
           <div className="status-pill">
             <div className="status-dot" />

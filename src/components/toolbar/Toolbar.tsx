@@ -28,7 +28,7 @@ export function Toolbar({
   loading,
   canStartImport,
   onRescan,
-  onStartImport
+  onStartImport,
 }: ToolbarProps) {
   const showCount = totalCount > 0;
   const hasSelection = selectedCount > 0 && selectedCount < totalCount;

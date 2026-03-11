@@ -68,8 +68,8 @@ function prefixFromImportStatus(status: ImportFileStatus): LogPrefix {
 }
 
 function getBaseForFile(file: MediaFile, jpgDest: string, rawDest: string): string | null {
-  const base = file.fileType === 'Raw' ? rawDest.trim()
-    : (file.fileType === 'Jpg' || file.fileType === 'Video') ? jpgDest.trim()
+  const base = file.fileType === 'raw' ? rawDest.trim()
+    : (file.fileType === 'jpg' || file.fileType === 'video') ? jpgDest.trim()
     : null;
   return base || null;
 }
@@ -160,6 +160,8 @@ export interface AppStateReturn {
   onRawDestinationChange: (value: string) => void;
   onJpgDestinationBlur: () => Promise<void>;
   onRawDestinationBlur: () => Promise<void>;
+  onBrowseJpgDestination: () => Promise<void>;
+  onBrowseRawDestination: () => Promise<void>;
   onSelectFile: (index: number) => void;
   onFilterChange: (filter: FileFilter) => void;
   onSortChange: (key: SortKey) => void;
@@ -372,20 +374,24 @@ export function useAppState(): AppStateReturn {
       return;
     }
 
+    const filePaths = fileRows
+      .filter((r) => !excludedFiles.has(r.file.path))
+      .map((r) => r.file.path);
+
     clearListeners();
     setPhase('importing');
     setImportSummary(null);
     setEstimatedSecondsRemaining(null);
     importStartTimeRef.current = Date.now();
     setProgressState({
-      totalFiles: scanResult.files.length,
+      totalFiles: filePaths.length,
       processedFiles: 0,
       copiedCount: 0,
       renamedCount: 0,
       skippedCount: 0,
       errorCount: 0
     });
-    addLog('info', 'IMPORT', `Starting import · ${scanResult.files.length.toLocaleString()} files…`);
+    addLog('info', 'IMPORT', `Starting import · ${filePaths.length.toLocaleString()} files…`);
 
     setImporting(true);
     try {
@@ -428,7 +434,8 @@ export function useAppState(): AppStateReturn {
       const summary = await startImport({
         sourcePath,
         jpgDestination: jpgDestination.trim(),
-        rawDestination: rawDestination.trim()
+        rawDestination: rawDestination.trim(),
+        filePaths
       });
 
       setImportSummary(summary);
@@ -526,6 +533,28 @@ export function useAppState(): AppStateReturn {
   const onJpgDestinationBlur = () => persistDestinations(jpgDestination, rawDestination);
   const onRawDestinationBlur = () => persistDestinations(jpgDestination, rawDestination);
 
+  const onBrowseJpgDestination = async () => {
+    if (!isTauriRuntime()) return;
+    try {
+      const selected = await open({ directory: true, multiple: false });
+      if (selected && typeof selected === 'string') {
+        setJpgDestination(selected);
+        await persistDestinations(selected, rawDestination);
+      }
+    } catch { /* silently ignore */ }
+  };
+
+  const onBrowseRawDestination = async () => {
+    if (!isTauriRuntime()) return;
+    try {
+      const selected = await open({ directory: true, multiple: false });
+      if (selected && typeof selected === 'string') {
+        setRawDestination(selected);
+        await persistDestinations(jpgDestination, selected);
+      }
+    } catch { /* silently ignore */ }
+  };
+
   const onSelectFile = (index: number) => {
     setSelectedFileIndex((prev) => (prev === index ? null : index));
   };
@@ -542,13 +571,16 @@ export function useAppState(): AppStateReturn {
   };
 
   const onToggleAllFiles = () => {
+    const allVisibleSelected = filteredRows.length > 0 &&
+      filteredRows.every((r) => !excludedFiles.has(r.file.path));
     setExcludedFiles((prev) => {
-      if (prev.size === 0) {
-        // Exclude all
-        return new Set(fileRows.map((r) => r.file.path));
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        filteredRows.forEach((r) => next.add(r.file.path));
+      } else {
+        filteredRows.forEach((r) => next.delete(r.file.path));
       }
-      // Include all
-      return new Set();
+      return next;
     });
   };
 
@@ -568,10 +600,10 @@ export function useAppState(): AppStateReturn {
     ? scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount
     : 0;
   const selectedCount = useMemo(
-    () => fileRows.filter((r) => !excludedFiles.has(r.file.path) && r.file.fileType !== 'Unknown').length,
+    () => fileRows.filter((r) => !excludedFiles.has(r.file.path) && r.file.fileType !== 'unknown').length,
     [fileRows, excludedFiles]
   );
-  const importableCount = selectedCount > 0 ? selectedCount : totalImportable;
+  const importableCount = selectedCount;
   const canStartImport = !!scanResult && importableCount > 0 && !importing && phase === 'ready';
 
   const progressPercent = progressState && progressState.totalFiles > 0
@@ -581,8 +613,8 @@ export function useAppState(): AppStateReturn {
   const filteredRows = useMemo(() => {
     const filtered = fileRows.filter((row) => {
       switch (activeFilter) {
-        case 'raw':    return row.file.fileType === 'Raw';
-        case 'jpg':    return row.file.fileType === 'Jpg';
+        case 'raw':    return row.file.fileType === 'raw';
+        case 'jpg':    return row.file.fileType === 'jpg';
         case 'dupes':  return row.status === 'duplicate';
         case 'new':    return row.status === 'copied';
         case 'errors': return row.status === 'error';
@@ -649,6 +681,8 @@ export function useAppState(): AppStateReturn {
     onRawDestinationChange,
     onJpgDestinationBlur,
     onRawDestinationBlur,
+    onBrowseJpgDestination,
+    onBrowseRawDestination,
     onSelectFile,
     onFilterChange,
     onSortChange,

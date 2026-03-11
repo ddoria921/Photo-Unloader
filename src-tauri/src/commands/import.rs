@@ -22,6 +22,7 @@ pub struct StartImportRequest {
     pub source_path: String,
     pub jpg_destination: String,
     pub raw_destination: String,
+    pub file_paths: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -97,11 +98,23 @@ fn run_import(app: &AppHandle, request: StartImportRequest) -> Result<ImportSumm
     let scan_result = scanner::scan_directory(&source_path)
         .map_err(|err| format!("Failed to scan source directory: {err}"))?;
 
+    let files_to_import: Vec<&scanner::MediaFile> = if let Some(ref paths) = request.file_paths {
+        let path_set: std::collections::HashSet<String> =
+            paths.iter().cloned().collect();
+        scan_result
+            .files
+            .iter()
+            .filter(|f| path_set.contains(&f.path.to_string_lossy().to_string()))
+            .collect()
+    } else {
+        scan_result.files.iter().collect()
+    };
+
     let mut summary = ImportSummary {
         source_path: request.source_path.clone(),
         jpg_destination: request.jpg_destination.clone(),
         raw_destination: request.raw_destination.clone(),
-        total_files: scan_result.files.len(),
+        total_files: files_to_import.len(),
         copied_count: 0,
         renamed_count: 0,
         skipped_count: 0,
@@ -110,7 +123,7 @@ fn run_import(app: &AppHandle, request: StartImportRequest) -> Result<ImportSumm
         completed_with_errors: false,
     };
 
-    for (index, media_file) in scan_result.files.iter().enumerate() {
+    for (index, media_file) in files_to_import.into_iter().enumerate() {
         let processed_files = index + 1;
         let current_file = media_file.path.display().to_string();
         let destination_root =
