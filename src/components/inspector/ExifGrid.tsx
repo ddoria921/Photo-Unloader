@@ -7,11 +7,12 @@ interface ExifGridProps {
   rawDestination: string;
 }
 
-function Row({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function Row({ label, value, accent }: { label: string; value: string | number | null | undefined; accent?: boolean }) {
+  const display = value != null ? String(value) : '—';
   return (
     <div className="exif-row">
       <span className="exif-key">{label}</span>
-      <span className={accent ? 'exif-val exif-val-accent' : 'exif-val'}>{value}</span>
+      <span className={accent ? 'exif-val exif-val-accent' : 'exif-val'}>{display}</span>
     </div>
   );
 }
@@ -53,29 +54,32 @@ export function ExifGrid({ file, jpgDestination, rawDestination }: ExifGridProps
   return (
     <div className="inspector-exif">
       <Section title="File">
-        <Row label="Name"   value={file.filename} accent />
-        <Row label="Size"   value={formatBytes(file.sizeBytes)} />
-        <Row label="Format" value={getFileTypeLabel(file)} />
-        <Row label="Hash"   value="—" />
+        <Row label="Name"      value={file.filename} accent />
+        <Row label="Size"      value={formatBytes(file.sizeBytes)} />
+        <Row label="Format"    value={getFileTypeLabel(file)} />
+        <Row label="Date"      value={file.capturedAt?.slice(0, 10)} />
+        <Row label="Hash"      value={file.sha256 ? `${file.sha256.slice(0, 4)}…${file.sha256.slice(-4)}` : null} />
       </Section>
 
       <Section title="Camera">
-        <Row label="Make"   value="—" />
-        <Row label="Model"  value="—" />
-        <Row label="Serial" value="—" />
+        <Row label="Make"  value={file.cameraMake} />
+        <Row label="Model" value={file.cameraModel} />
       </Section>
 
       <Section title="Exposure">
-        <Row label="Aperture"    value="—" />
-        <Row label="Shutter"     value="—" />
-        <Row label="ISO"         value="—" />
-        <Row label="Focal Length" value="—" />
-        <Row label="Lens"        value="—" />
-        <Row label="White Balance" value="—" />
+        <Row label="Aperture"      value={file.aperture} />
+        <Row label="Shutter"       value={file.shutterSpeed} />
+        <Row label="ISO"           value={file.iso} />
+        <Row label="Focal Length"  value={file.focalLength} />
+        <Row label="Lens"          value={file.lens} />
+        <Row label="White Balance" value={file.whiteBalance} />
       </Section>
 
       <Section title="Destination">
         <Row label="Path" value={destPath} accent={destPath !== '—'} />
+        {file.pairedFile && (
+          <Row label="Pair" value={`${file.pairedFile} ✓`} accent />
+        )}
       </Section>
     </div>
   );

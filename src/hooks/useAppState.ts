@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import {
   getAppSettings,
+  getSessions,
   isTauriRuntime,
   openInFinder,
   saveAppSettings,
+  saveSession,
   scanCard,
   scanFilesInBrowser,
   startImport
@@ -23,7 +25,10 @@ import type {
   LogPrefix,
   MediaFile,
   ProgressState,
-  ScanResult
+  ScanResult,
+  SessionRecord,
+  SortDir,
+  SortKey
 } from '@/types';
 import { useImportListener } from './useImportListener';
 import { useToast } from './useToast';
@@ -62,11 +67,34 @@ function prefixFromImportStatus(status: ImportFileStatus): LogPrefix {
   return status === 'SkippedDuplicate' ? 'DUPE' : 'IMPORT';
 }
 
-function buildFileRows(result: ScanResult): FileTableRow[] {
+function getBaseForFile(file: MediaFile, jpgDest: string, rawDest: string): string | null {
+  const base = file.fileType === 'Raw' ? rawDest.trim()
+    : (file.fileType === 'Jpg' || file.fileType === 'Video') ? jpgDest.trim()
+    : null;
+  return base || null;
+}
+
+function computeDestForFile(
+  file: MediaFile,
+  jpgDest: string,
+  rawDest: string
+): { destinationPath: string | null; destinationBase: string | null } {
+  const base = getBaseForFile(file, jpgDest, rawDest);
+  if (!base) return { destinationPath: null, destinationBase: null };
+  if (file.capturedAt) {
+    const date = file.capturedAt.slice(0, 10); // "2026-03-15"
+    const [year, month] = date.split('-');
+    const sub = `${year}/${month}/${date}/`;
+    return { destinationPath: `${base}/${sub}`, destinationBase: `${base}/` };
+  }
+  return { destinationPath: `${base}/`, destinationBase: `${base}/` };
+}
+
+function buildFileRows(result: ScanResult, jpgDest = '', rawDest = ''): FileTableRow[] {
   return result.files.map((file) => ({
     file,
     status: 'ready' as FileRowStatus,
-    destinationPath: null
+    ...computeDestForFile(file, jpgDest, rawDest)
   }));
 }
 
@@ -84,6 +112,7 @@ export interface AppStateReturn {
   // State
   phase: DashboardPhase;
   sourcePath: string;
+  sessions: SessionRecord[];
   scanResult: ScanResult | null;
   loading: boolean;
   importing: boolean;
@@ -99,6 +128,7 @@ export interface AppStateReturn {
 
   // Computed
   importableCount: number;
+  selectedCount: number;
   canStartImport: boolean;
   progressPercent: number;
   filteredRows: FileTableRow[];
@@ -106,6 +136,10 @@ export interface AppStateReturn {
   importedCount: number;
   errorCount: number;
   selectedFile: MediaFile | null;
+  estimatedSecondsRemaining: number | null;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  excludedFiles: Set<string>;
 
   // Refs
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -128,6 +162,9 @@ export interface AppStateReturn {
   onRawDestinationBlur: () => Promise<void>;
   onSelectFile: (index: number) => void;
   onFilterChange: (filter: FileFilter) => void;
+  onSortChange: (key: SortKey) => void;
+  onToggleFileExclusion: (path: string) => void;
+  onToggleAllFiles: () => void;
 }
 
 export function useAppState(): AppStateReturn {
@@ -145,24 +182,44 @@ export function useAppState(): AppStateReturn {
   const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null);
   const [activeFilter, setActiveFilter] = useState<FileFilter>('all');
   const [fileRows, setFileRows] = useState<FileTableRow[]>([]);
+  const [sortKey, setSortKey] = useState<SortKey>('filename');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [excludedFiles, setExcludedFiles] = useState<Set<string>>(new Set());
+  const [estimatedSecondsRemaining, setEstimatedSecondsRemaining] = useState<number | null>(null);
+  const [sessions, setSessions] = useState<SessionRecord[]>([]);
 
+  const importStartTimeRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { toasts, showToast, dismissToast, clearAllToastTimers } = useToast();
   const { listenToImportProgress, clearListeners } = useImportListener();
 
-  // Load settings on mount
+  // Load settings and sessions on mount
   useEffect(() => {
     if (!isTauriRuntime()) return;
     let cancelled = false;
     getAppSettings()
-      .then((settings) => {
-        if (!cancelled) {
-          setAppSettings(settings);
-        }
-      })
-      .catch(() => {/* silently ignore */});
+      .then((settings) => { if (!cancelled) setAppSettings(settings); })
+      .catch(() => {});
+    getSessions()
+      .then((s) => { if (!cancelled) setSessions(s); })
+      .catch(() => {});
     return () => { cancelled = true; };
   }, []);
+
+  // Recompute destination paths when destinations change
+  useEffect(() => {
+    if (fileRows.length === 0) return;
+    setFileRows((rows) => {
+      let changed = false;
+      const next = rows.map((row) => {
+        const dest = computeDestForFile(row.file, jpgDestination, rawDestination);
+        if (dest.destinationPath === row.destinationPath && dest.destinationBase === row.destinationBase) return row;
+        changed = true;
+        return { ...row, ...dest };
+      });
+      return changed ? next : rows;
+    });
+  }, [jpgDestination, rawDestination]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -189,6 +246,7 @@ export function useAppState(): AppStateReturn {
     setImportLog([]);
     setFileRows([]);
     setSelectedFileIndex(null);
+    setExcludedFiles(new Set());
     setPhase('idle');
   };
 
@@ -204,8 +262,9 @@ export function useAppState(): AppStateReturn {
     try {
       addLog('info', 'SCAN', `Scanning ${source}…`);
       const result = await scanCard(source);
+      const preferred = withSettingsFallback(source, appSettings);
       setScanResult(result);
-      setFileRows(buildFileRows(result));
+      setFileRows(buildFileRows(result, preferred.jpg, preferred.raw));
       applyPreferredDestinations(source, appSettings);
       setPhase('ready');
       addLog(
@@ -271,8 +330,9 @@ export function useAppState(): AppStateReturn {
 
     try {
       const result = scanFilesInBrowser(selectedFiles);
+      const preferred = withSettingsFallback(rootFolder, appSettings);
       setScanResult(result);
-      setFileRows(buildFileRows(result));
+      setFileRows(buildFileRows(result, preferred.jpg, preferred.raw));
       applyPreferredDestinations(rootFolder, appSettings);
       setPhase('ready');
       addLog('info', 'SCAN', `Found ${result.files.length.toLocaleString()} files in browser mode`);
@@ -315,6 +375,8 @@ export function useAppState(): AppStateReturn {
     clearListeners();
     setPhase('importing');
     setImportSummary(null);
+    setEstimatedSecondsRemaining(null);
+    importStartTimeRef.current = Date.now();
     setProgressState({
       totalFiles: scanResult.files.length,
       processedFiles: 0,
@@ -336,6 +398,14 @@ export function useAppState(): AppStateReturn {
           skippedCount: payload.skippedCount,
           errorCount: payload.errorCount
         });
+
+        // Compute estimated time remaining
+        if (importStartTimeRef.current !== null && payload.processedFiles > 0) {
+          const elapsedMs = Date.now() - importStartTimeRef.current;
+          const msPerFile = elapsedMs / payload.processedFiles;
+          const remaining = payload.totalFiles - payload.processedFiles;
+          setEstimatedSecondsRemaining(Math.ceil((msPerFile * remaining) / 1000));
+        }
 
         const filename = shortFileName(payload.currentFile);
         const level = payload.status === 'Error' ? 'error'
@@ -362,7 +432,29 @@ export function useAppState(): AppStateReturn {
       });
 
       setImportSummary(summary);
+      setEstimatedSecondsRemaining(null);
+      importStartTimeRef.current = null;
       setPhase('done');
+
+      // Persist session record
+      if (isTauriRuntime()) {
+        const record: SessionRecord = {
+          id: String(Date.now()),
+          completedAt: new Date().toISOString(),
+          sourcePath,
+          jpgDestination: jpgDestination.trim(),
+          rawDestination: rawDestination.trim(),
+          totalFiles: summary.totalFiles,
+          copiedCount: summary.copiedCount,
+          skippedCount: summary.skippedCount,
+          errorCount: summary.errorCount,
+          completedWithErrors: summary.completedWithErrors
+        };
+        saveSession(record)
+          .then(() => getSessions())
+          .then((s) => setSessions(s))
+          .catch(() => {});
+      }
       addLog(
         summary.completedWithErrors ? 'warn' : 'info',
         'IMPORT',
@@ -440,26 +532,76 @@ export function useAppState(): AppStateReturn {
 
   const onFilterChange = (filter: FileFilter) => setActiveFilter(filter);
 
+  const onToggleFileExclusion = (path: string) => {
+    setExcludedFiles((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  };
+
+  const onToggleAllFiles = () => {
+    setExcludedFiles((prev) => {
+      if (prev.size === 0) {
+        // Exclude all
+        return new Set(fileRows.map((r) => r.file.path));
+      }
+      // Include all
+      return new Set();
+    });
+  };
+
+  const onSortChange = (key: SortKey) => {
+    setSortKey((prev) => {
+      if (prev === key) {
+        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+        return prev;
+      }
+      setSortDir('asc');
+      return key;
+    });
+  };
+
   // Computed values
-  const importableCount = scanResult
+  const totalImportable = scanResult
     ? scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount
     : 0;
+  const selectedCount = useMemo(
+    () => fileRows.filter((r) => !excludedFiles.has(r.file.path) && r.file.fileType !== 'Unknown').length,
+    [fileRows, excludedFiles]
+  );
+  const importableCount = selectedCount > 0 ? selectedCount : totalImportable;
   const canStartImport = !!scanResult && importableCount > 0 && !importing && phase === 'ready';
 
   const progressPercent = progressState && progressState.totalFiles > 0
     ? Math.min(100, Math.round((progressState.processedFiles / progressState.totalFiles) * 100))
     : 0;
 
-  const filteredRows = useMemo(() => fileRows.filter((row) => {
-    switch (activeFilter) {
-      case 'raw':    return row.file.fileType === 'Raw';
-      case 'jpg':    return row.file.fileType === 'Jpg';
-      case 'dupes':  return row.status === 'duplicate';
-      case 'new':    return row.status === 'copied';
-      case 'errors': return row.status === 'error';
-      default:       return true;
-    }
-  }), [fileRows, activeFilter]);
+  const filteredRows = useMemo(() => {
+    const filtered = fileRows.filter((row) => {
+      switch (activeFilter) {
+        case 'raw':    return row.file.fileType === 'Raw';
+        case 'jpg':    return row.file.fileType === 'Jpg';
+        case 'dupes':  return row.status === 'duplicate';
+        case 'new':    return row.status === 'copied';
+        case 'errors': return row.status === 'error';
+        default:       return true;
+      }
+    });
+
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (sortKey) {
+        case 'filename': return dir * a.file.filename.localeCompare(b.file.filename);
+        case 'type':     return dir * a.file.fileType.localeCompare(b.file.fileType);
+        case 'date':     return dir * (a.file.capturedAt ?? '').localeCompare(b.file.capturedAt ?? '');
+        case 'size':     return dir * (a.file.sizeBytes - b.file.sizeBytes);
+        case 'status':   return dir * a.status.localeCompare(b.status);
+        default:         return 0;
+      }
+    });
+  }, [fileRows, activeFilter, sortKey, sortDir]);
 
   const duplicateCount = useMemo(() => fileRows.filter((r) => r.status === 'duplicate').length, [fileRows]);
   const importedCount  = useMemo(() => fileRows.filter((r) => r.status === 'copied').length,    [fileRows]);
@@ -470,6 +612,7 @@ export function useAppState(): AppStateReturn {
   return {
     phase,
     sourcePath,
+    sessions,
     scanResult,
     loading,
     importing,
@@ -483,6 +626,7 @@ export function useAppState(): AppStateReturn {
     activeFilter,
     fileRows,
     importableCount,
+    selectedCount,
     canStartImport,
     progressPercent,
     filteredRows,
@@ -490,6 +634,7 @@ export function useAppState(): AppStateReturn {
     importedCount,
     errorCount,
     selectedFile,
+    estimatedSecondsRemaining,
     fileInputRef,
     toasts,
     dismissToast,
@@ -505,6 +650,12 @@ export function useAppState(): AppStateReturn {
     onJpgDestinationBlur,
     onRawDestinationBlur,
     onSelectFile,
-    onFilterChange
+    onFilterChange,
+    onSortChange,
+    onToggleFileExclusion,
+    onToggleAllFiles,
+    sortKey,
+    sortDir,
+    excludedFiles
   };
 }

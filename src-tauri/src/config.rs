@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
 const SETTINGS_FILE_NAME: &str = "settings.json";
+const SESSIONS_FILE_NAME: &str = "sessions.json";
+const MAX_SESSIONS: usize = 50;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -51,6 +53,51 @@ pub fn save_settings(app: &AppHandle, settings: &AppSettings) -> Result<(), Stri
             settings_path.display()
         )
     })
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionRecord {
+    pub id: String,
+    pub completed_at: String,
+    pub source_path: String,
+    pub jpg_destination: String,
+    pub raw_destination: String,
+    pub total_files: usize,
+    pub copied_count: usize,
+    pub skipped_count: usize,
+    pub error_count: usize,
+    pub completed_with_errors: bool,
+}
+
+pub fn load_sessions(app: &AppHandle) -> Result<Vec<SessionRecord>, String> {
+    let path = sessions_path(app)?;
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let file = fs::File::open(&path)
+        .map_err(|e| format!("Failed to open sessions file: {e}"))?;
+    serde_json::from_reader::<_, Vec<SessionRecord>>(BufReader::new(file))
+        .map_err(|e| format!("Failed to parse sessions file: {e}"))
+}
+
+pub fn append_session(app: &AppHandle, record: SessionRecord) -> Result<(), String> {
+    let mut sessions = load_sessions(app).unwrap_or_default();
+    sessions.insert(0, record); // newest first
+    sessions.truncate(MAX_SESSIONS);
+
+    let path = sessions_path(app)?;
+    let parent = path.parent().ok_or("Invalid sessions path")?;
+    fs::create_dir_all(parent).map_err(|e| format!("Failed to create config dir: {e}"))?;
+    let file = fs::File::create(&path)
+        .map_err(|e| format!("Failed to write sessions file: {e}"))?;
+    serde_json::to_writer_pretty(BufWriter::new(file), &sessions)
+        .map_err(|e| format!("Failed to serialize sessions: {e}"))
+}
+
+fn sessions_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let dir = app.path().app_config_dir().map_err(|e| format!("Config dir error: {e}"))?;
+    Ok(dir.join(SESSIONS_FILE_NAME))
 }
 
 fn settings_path(app: &AppHandle) -> Result<PathBuf, String> {
