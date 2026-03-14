@@ -14,6 +14,7 @@ interface ToolbarProps {
   canStartImport: boolean;
   onRescan: () => void;
   onStartImport: () => void;
+  onCancelImport: () => void;
 }
 
 export function Toolbar({
@@ -29,6 +30,7 @@ export function Toolbar({
   canStartImport,
   onRescan,
   onStartImport,
+  onCancelImport,
 }: ToolbarProps) {
   const showCount = totalCount > 0;
   const hasSelection = selectedCount > 0 && selectedCount < totalCount;
@@ -71,16 +73,24 @@ export function Toolbar({
         ⟳ Rescan
       </button>
 
-      <button
-        className="btn btn-primary"
-        onClick={onStartImport}
-        disabled={!canStartImport}
-        title="Start importing files"
-      >
-        {importing
-          ? 'Importing…'
-          : `↓ Import ${importableCount > 0 ? importableCount.toLocaleString() + ' files' : ''}`}
-      </button>
+      {importing ? (
+        <button
+          className="btn btn-ghost"
+          onClick={onCancelImport}
+          title="Cancel import"
+        >
+          ✕ Cancel
+        </button>
+      ) : (
+        <button
+          className="btn btn-primary"
+          onClick={onStartImport}
+          disabled={!canStartImport}
+          title="Start importing files"
+        >
+          {`↓ Import ${importableCount > 0 ? importableCount.toLocaleString() + ' files' : ''}`}
+        </button>
+      )}
     </div>
   );
 }

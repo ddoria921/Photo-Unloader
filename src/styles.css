@@ -808,7 +808,7 @@ input {
 
 .file-table-wrap {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border-bright) transparent;
@@ -840,18 +840,8 @@ input {
   white-space: nowrap;
   overflow: hidden;
   user-select: none;
+  position: relative;
 }
-
-.file-table th.col-check    { width: 28px; }
-.file-table th.col-thumb    { width: 44px; }
-.file-table th.col-name     { width: auto; }
-.file-table th.col-type     { width: 56px; }
-.file-table th.col-date     { width: 100px; }
-.file-table th.col-camera   { width: 110px; }
-.file-table th.col-exposure { width: 120px; }
-.file-table th.col-size     { width: 66px; }
-.file-table th.col-dest     { width: 150px; }
-.file-table th.col-status   { width: 76px; }
 
 .exposure-cell { letter-spacing: -0.01em; }
 
@@ -860,6 +850,30 @@ input {
   user-select: none;
 }
 .col-sortable:hover { color: var(--text-primary); }
+
+.col-resizable { padding-right: 12px; }
+
+.col-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 1;
+}
+.col-resize-handle::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 20%;
+  bottom: 20%;
+  width: 1px;
+  background: var(--border);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.col-resize-handle:hover::after { opacity: 1; }
 
 .sort-indicator { margin-left: 3px; font-size: 9px; }
 .sort-indicator-idle   { color: var(--text-dim); }
@@ -1167,6 +1181,13 @@ input {
   letter-spacing: 0.15em;
   color: var(--text-dim);
   text-transform: uppercase;
+}
+
+.inspector-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .inspector-exif {

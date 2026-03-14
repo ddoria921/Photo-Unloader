@@ -49,6 +49,7 @@ function App() {
     onSelectBrowserDirectory,
     onRescan,
     onStartImport,
+    onCancelImport,
     onImportAnother,
     onOpenInFinder,
     onJpgDestinationChange,
@@ -128,6 +129,7 @@ function App() {
           canStartImport={canStartImport}
           onRescan={onRescan}
           onStartImport={onStartImport}
+          onCancelImport={onCancelImport}
         />
         <FileTable
           rows={filteredRows}
@@ -147,7 +149,10 @@ function App() {
             const row = filteredRows[filteredIdx];
             if (row) {
               const realIdx = fileRows.indexOf(row);
-              if (realIdx !== -1) onSelectFile(realIdx);
+              if (realIdx !== -1) {
+                onSelectFile(realIdx);
+                setInspectorOpen(true);
+              }
             }
           }}
         />
