@@ -5,7 +5,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-const JPG_EXT: &[&str] = &["jpg", "jpeg", "heic", "png", "tiff"];
+const JPG_EXT: &[&str] = &["jpg", "jpeg", "heic", "heif", "png", "tiff"];
 const RAW_EXT: &[&str] = &["cr2", "cr3", "nef", "arw", "orf", "raf", "dng", "rw2"];
 const VIDEO_EXT: &[&str] = &["mp4", "mov", "avi", "mkv"];
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import {
+  cancelImport,
   getAppSettings,
   getSessions,
   isTauriRuntime,
@@ -154,6 +155,7 @@ export interface AppStateReturn {
   onRescan: () => Promise<void>;
   onStartImport: () => Promise<void>;
   onReset: () => void;
+  onCancelImport: () => Promise<void>;
   onImportAnother: () => Promise<void>;
   onOpenInFinder: () => Promise<void>;
   onJpgDestinationChange: (value: string) => void;
@@ -358,8 +360,8 @@ export function useAppState(): AppStateReturn {
   const onStartImport = async () => {
     if (!scanResult) return;
 
-    const importableCount = scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount;
-    if (importableCount === 0) {
+    const queuedCount = filteredRows.filter((r) => !excludedFiles.has(r.file.path) && r.file.fileType !== 'unknown').length;
+    if (queuedCount === 0) {
       showToast({ title: 'Nothing to import', description: 'No importable files found.', variant: 'default' });
       return;
     }
@@ -374,7 +376,7 @@ export function useAppState(): AppStateReturn {
       return;
     }
 
-    const filePaths = fileRows
+    const filePaths = filteredRows
       .filter((r) => !excludedFiles.has(r.file.path))
       .map((r) => r.file.path);
 
@@ -486,6 +488,13 @@ export function useAppState(): AppStateReturn {
     }
   };
 
+  const onCancelImport = async () => {
+    if (!importing) return;
+    try {
+      await cancelImport();
+    } catch { /* ignore */ }
+  };
+
   const onReset = () => {
     if (importing) return;
     resetScan();
@@ -585,26 +594,19 @@ export function useAppState(): AppStateReturn {
   };
 
   const onSortChange = (key: SortKey) => {
-    setSortKey((prev) => {
-      if (prev === key) {
-        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-        return prev;
-      }
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
       setSortDir('asc');
-      return key;
-    });
+    }
   };
 
   // Computed values
-  const totalImportable = scanResult
-    ? scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount
-    : 0;
   const selectedCount = useMemo(
     () => fileRows.filter((r) => !excludedFiles.has(r.file.path) && r.file.fileType !== 'unknown').length,
     [fileRows, excludedFiles]
   );
-  const importableCount = selectedCount;
-  const canStartImport = !!scanResult && importableCount > 0 && !importing && phase === 'ready';
 
   const progressPercent = progressState && progressState.totalFiles > 0
     ? Math.min(100, Math.round((progressState.processedFiles / progressState.totalFiles) * 100))
@@ -634,6 +636,12 @@ export function useAppState(): AppStateReturn {
       }
     });
   }, [fileRows, activeFilter, sortKey, sortDir]);
+
+  const importableCount = useMemo(
+    () => filteredRows.filter((r) => !excludedFiles.has(r.file.path) && r.file.fileType !== 'unknown').length,
+    [filteredRows, excludedFiles]
+  );
+  const canStartImport = !!scanResult && importableCount > 0 && !importing && phase === 'ready';
 
   const duplicateCount = useMemo(() => fileRows.filter((r) => r.status === 'duplicate').length, [fileRows]);
   const importedCount  = useMemo(() => fileRows.filter((r) => r.status === 'copied').length,    [fileRows]);
@@ -674,6 +682,7 @@ export function useAppState(): AppStateReturn {
     onSelectBrowserDirectory,
     onRescan,
     onStartImport,
+    onCancelImport,
     onReset,
     onImportAnother,
     onOpenInFinder,
