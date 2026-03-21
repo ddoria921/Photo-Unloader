@@ -9,7 +9,7 @@ import type {
   StartImportRequest
 } from '@/types';
 
-const JPG_EXTENSIONS = new Set(['jpg', 'jpeg', 'heic', 'png', 'tiff']);
+const JPG_EXTENSIONS = new Set(['jpg', 'jpeg', 'heic', 'heif', 'png', 'tiff']);
 const RAW_EXTENSIONS = new Set(['cr2', 'cr3', 'nef', 'arw', 'orf', 'raf', 'dng', 'rw2']);
 const VIDEO_EXTENSIONS = new Set(['mp4', 'mov', 'avi', 'mkv']);
 
@@ -19,6 +19,10 @@ export async function scanCard(sourcePath: string): Promise<ScanResult> {
 
 export async function startImport(request: StartImportRequest): Promise<ImportSummary> {
   return invoke<ImportSummary>('start_import', { request });
+}
+
+export async function cancelImport(): Promise<void> {
+  return invoke('cancel_import');
 }
 
 export async function openInFinder(path: string): Promise<void> {

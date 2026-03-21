@@ -1,11 +1,16 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::{fs, fs::OpenOptions};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_notification::NotificationExt;
+
+/// Shared cancel token — managed as Tauri app state.
+pub struct ImportCancelToken(pub Arc<AtomicBool>);
 
 use crate::importer::{
     copier::{self, CopyStatus},
@@ -69,8 +74,18 @@ pub struct ImportSummary {
 pub async fn start_import(
     app: AppHandle,
     request: StartImportRequest,
+    cancel_token: tauri::State<'_, ImportCancelToken>,
 ) -> Result<ImportSummary, String> {
-    run_import(&app, request)
+    cancel_token.0.store(false, Ordering::SeqCst);
+    run_import(&app, request, cancel_token.0.clone())
+}
+
+#[tauri::command]
+pub async fn cancel_import(
+    cancel_token: tauri::State<'_, ImportCancelToken>,
+) -> Result<(), String> {
+    cancel_token.0.store(true, Ordering::SeqCst);
+    Ok(())
 }
 
 #[tauri::command]
@@ -87,7 +102,7 @@ pub async fn open_in_finder(path: String) -> Result<(), String> {
     }
 }
 
-fn run_import(app: &AppHandle, request: StartImportRequest) -> Result<ImportSummary, String> {
+fn run_import(app: &AppHandle, request: StartImportRequest, cancel: Arc<AtomicBool>) -> Result<ImportSummary, String> {
     let source_path = PathBuf::from(&request.source_path);
     let jpg_root = PathBuf::from(&request.jpg_destination);
     let raw_root = PathBuf::from(&request.raw_destination);
@@ -124,6 +139,9 @@ fn run_import(app: &AppHandle, request: StartImportRequest) -> Result<ImportSumm
     };
 
     for (index, media_file) in files_to_import.into_iter().enumerate() {
+        if cancel.load(Ordering::SeqCst) {
+            return Err("Import cancelled by user.".to_string());
+        }
         let processed_files = index + 1;
         let current_file = media_file.path.display().to_string();
         let destination_root =
