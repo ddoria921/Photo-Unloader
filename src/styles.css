@@ -198,9 +198,9 @@ input {
   gap: 5px;
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--green);
-  background: var(--green-dim);
-  border: 1px solid rgba(76, 175, 125, 0.2);
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(232, 197, 71, 0.2);
   padding: 2px 8px;
   border-radius: var(--radius-sm);
   letter-spacing: 0.04em;
@@ -210,7 +210,7 @@ input {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--green);
+  background: var(--accent);
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -700,8 +700,8 @@ input {
 }
 
 .panel-toggle-btn--active {
-  color: var(--accent-yellow, #e8c547);
-  background: rgba(232, 197, 71, 0.08);
+  color: var(--accent);
+  background: var(--accent-dim);
 }
 
 /* Toolbar buttons */
