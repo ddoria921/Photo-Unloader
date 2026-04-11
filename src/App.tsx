@@ -123,6 +123,8 @@ function App() {
           filteredCount={filteredRows.length}
           importableCount={importableCount}
           selectedCount={selectedCount}
+          dupesCount={duplicateCount}
+          errorsCount={errorCount}
           phase={phase}
           importing={importing}
           loading={loading}

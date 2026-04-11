@@ -8,6 +8,8 @@ interface ToolbarProps {
   filteredCount: number;
   importableCount: number;
   selectedCount: number;
+  dupesCount: number;
+  errorsCount: number;
   phase: DashboardPhase;
   importing: boolean;
   loading: boolean;
@@ -24,6 +26,8 @@ export function Toolbar({
   filteredCount,
   importableCount,
   selectedCount,
+  dupesCount,
+  errorsCount,
   phase,
   importing,
   loading,
@@ -45,9 +49,9 @@ export function Toolbar({
 
       <div className="toolbar-sep" />
 
-      <FilterChip label="DUPES"   active={activeFilter === 'dupes'}   onClick={() => onFilterChange('dupes')} />
+      <FilterChip label="DUPES"   active={activeFilter === 'dupes'}   onClick={() => onFilterChange('dupes')}  badge={dupesCount}  badgeVariant="amber" />
       <FilterChip label="NEW"     active={activeFilter === 'new'}     onClick={() => onFilterChange('new')} />
-      <FilterChip label="ERRORS"  active={activeFilter === 'errors'}  onClick={() => onFilterChange('errors')} />
+      <FilterChip label="ERRORS"  active={activeFilter === 'errors'}  onClick={() => onFilterChange('errors')} badge={errorsCount} badgeVariant="red" />
 
       <div className="toolbar-spacer" />
 
