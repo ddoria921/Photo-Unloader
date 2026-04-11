@@ -13,6 +13,9 @@ export function FilterChip({ label, active, onClick, badge, badgeVariant }: Filt
     <button
       className={cn('filter-chip', active && 'active')}
       onClick={onClick}
+      role="tab"
+      aria-selected={active}
+      tabIndex={active ? 0 : -1}
     >
       {label}
       {badge != null && badge > 0 && (

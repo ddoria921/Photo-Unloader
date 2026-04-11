@@ -1,5 +1,8 @@
+import { useRef } from 'react';
 import type { DashboardPhase, FileFilter } from '@/types';
 import { FilterChip } from './FilterChip';
+
+const FILTERS: FileFilter[] = ['all', 'raw', 'jpg', 'dupes', 'new', 'errors'];
 
 interface ToolbarProps {
   activeFilter: FileFilter;
@@ -38,20 +41,41 @@ export function Toolbar({
 }: ToolbarProps) {
   const showCount = totalCount > 0;
   const hasSelection = selectedCount > 0 && selectedCount < totalCount;
+  const groupRef = useRef<HTMLDivElement>(null);
+
+  const handleGroupKeyDown = (e: React.KeyboardEvent) => {
+    const idx = FILTERS.indexOf(activeFilter);
+    let nextIdx = idx;
+    if (e.key === 'ArrowRight') nextIdx = (idx + 1) % FILTERS.length;
+    else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + FILTERS.length) % FILTERS.length;
+    else return;
+    e.preventDefault();
+    onFilterChange(FILTERS[nextIdx]);
+    const buttons = groupRef.current?.querySelectorAll<HTMLButtonElement>('button[role="tab"]');
+    buttons?.[nextIdx]?.focus();
+  };
 
   return (
     <div className="toolbar">
       <span className="toolbar-label">Filter</span>
 
-      <FilterChip label="ALL"  active={activeFilter === 'all'}  onClick={() => onFilterChange('all')} />
-      <FilterChip label="RAW"  active={activeFilter === 'raw'}  onClick={() => onFilterChange('raw')} />
-      <FilterChip label="JPG"  active={activeFilter === 'jpg'}  onClick={() => onFilterChange('jpg')} />
+      <div
+        ref={groupRef}
+        role="tablist"
+        aria-label="File filter"
+        style={{ display: 'contents' }}
+        onKeyDown={handleGroupKeyDown}
+      >
+        <FilterChip label="ALL"    active={activeFilter === 'all'}    onClick={() => onFilterChange('all')} />
+        <FilterChip label="RAW"    active={activeFilter === 'raw'}    onClick={() => onFilterChange('raw')} />
+        <FilterChip label="JPG"    active={activeFilter === 'jpg'}    onClick={() => onFilterChange('jpg')} />
 
-      <div className="toolbar-sep" />
+        <div className="toolbar-sep" />
 
-      <FilterChip label="DUPES"   active={activeFilter === 'dupes'}   onClick={() => onFilterChange('dupes')}  badge={dupesCount}  badgeVariant="amber" />
-      <FilterChip label="NEW"     active={activeFilter === 'new'}     onClick={() => onFilterChange('new')} />
-      <FilterChip label="ERRORS"  active={activeFilter === 'errors'}  onClick={() => onFilterChange('errors')} badge={errorsCount} badgeVariant="red" />
+        <FilterChip label="DUPES"   active={activeFilter === 'dupes'}   onClick={() => onFilterChange('dupes')}  badge={dupesCount}  badgeVariant="amber" />
+        <FilterChip label="NEW"     active={activeFilter === 'new'}     onClick={() => onFilterChange('new')} />
+        <FilterChip label="ERRORS"  active={activeFilter === 'errors'}  onClick={() => onFilterChange('errors')} badge={errorsCount} badgeVariant="red" />
+      </div>
 
       <div className="toolbar-spacer" />
 
