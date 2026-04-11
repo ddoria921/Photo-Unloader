@@ -91,7 +91,8 @@ input {
   background: var(--bg-base);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
   border-radius: 10px;
-  transition: grid-template-columns 0.22s ease, grid-template-rows 0.22s ease;
+  position: relative;
+  transition: grid-template-columns 0.18s ease-in-out, grid-template-rows 0.18s ease-in-out;
 }
 
 .app-shell[data-sidebar-collapsed] {
@@ -105,6 +106,27 @@ input {
 .app-shell[data-bottom-collapsed] {
   --bottom-h: 0px;
 }
+
+/* Reveal handles — thin strips at grid edges when a side panel is collapsed */
+.reveal-handle {
+  position: absolute;
+  top: var(--titlebar-h);
+  bottom: 0;
+  width: 8px;
+  z-index: 20;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.reveal-handle:hover {
+  background: var(--accent-dim);
+}
+
+.reveal-handle-left  { left: 0; }
+.reveal-handle-right { right: 0; }
 
 /* ── TITLEBAR ────────────────────────────────────────────────────────────── */
 .titlebar {
@@ -702,6 +724,11 @@ input {
 .panel-toggle-btn--active {
   color: var(--accent-yellow, #e8c547);
   background: rgba(232, 197, 71, 0.08);
+}
+
+.panel-toggle-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 /* Toolbar buttons */
