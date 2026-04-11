@@ -14,6 +14,8 @@ interface FileTableProps {
   onSortChange: (key: SortKey) => void;
   onToggleFileExclusion: (path: string) => void;
   onToggleAllFiles: () => void;
+  onBrowse: () => void;
+  onDropPath: (path: string) => void;
 }
 
 function SortIndicator({ active, dir }: { active: boolean; dir: SortDir }) {
@@ -47,7 +49,7 @@ const FIXED_CHECK = 28;
 const FIXED_THUMB = 44;
 const MIN_COL_WIDTH = 40;
 
-export function FileTable({ rows, selectedIndex, phase, sortKey, sortDir, excludedFiles, onRowSelect, onSortChange, onToggleFileExclusion, onToggleAllFiles }: FileTableProps) {
+export function FileTable({ rows, selectedIndex, phase, sortKey, sortDir, excludedFiles, onRowSelect, onSortChange, onToggleFileExclusion, onToggleAllFiles, onBrowse, onDropPath }: FileTableProps) {
   const tbodyRef = useRef<HTMLTableSectionElement | null>(null);
   const [colWidths, setColWidths] = useState<ColWidths>(DEFAULT_WIDTHS);
   const dragRef = useRef<{ col: keyof ColWidths; startX: number; startWidth: number } | null>(null);
@@ -117,7 +119,7 @@ export function FileTable({ rows, selectedIndex, phase, sortKey, sortDir, exclud
   if (phase === 'idle' || phase === 'scanning') {
     return (
       <div className="file-table-area">
-        <FileTableEmpty scanning={phase === 'scanning'} />
+        <FileTableEmpty scanning={phase === 'scanning'} onBrowse={onBrowse} onDropPath={onDropPath} />
       </div>
     );
   }

@@ -151,6 +151,7 @@ export interface AppStateReturn {
 
   // Actions
   onBrowse: () => Promise<void>;
+  onDropSourcePath: (path: string) => Promise<void>;
   onSelectBrowserDirectory: (event: ChangeEvent<HTMLInputElement>) => void;
   onRescan: () => Promise<void>;
   onStartImport: () => Promise<void>;
@@ -286,6 +287,13 @@ export function useAppState(): AppStateReturn {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onDropSourcePath = async (path: string) => {
+    if (!isTauriRuntime()) return;
+    resetScan();
+    setSourcePath(path);
+    await runScan(path);
   };
 
   const onBrowse = async () => {
@@ -679,6 +687,7 @@ export function useAppState(): AppStateReturn {
     toasts,
     dismissToast,
     onBrowse,
+    onDropSourcePath,
     onSelectBrowserDirectory,
     onRescan,
     onStartImport,
