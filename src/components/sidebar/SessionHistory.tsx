@@ -5,6 +5,26 @@ interface SessionHistoryProps {
   sessions: SessionRecord[];
 }
 
+type SessionStatus = 'success' | 'error' | 'warning';
+
+function getSessionStatus(s: SessionRecord): SessionStatus {
+  if (s.errorCount > 0) return 'error';
+  if (s.skippedCount > 0) return 'warning';
+  return 'success';
+}
+
+function compactStats(s: SessionRecord): string {
+  if (s.errorCount > 0) return `${s.copiedCount} copied · ${s.errorCount} error${s.errorCount !== 1 ? 's' : ''}`;
+  if (s.skippedCount > 0) return `${s.copiedCount} copied · ${s.skippedCount} skipped`;
+  return `${s.copiedCount} copied`;
+}
+
+function dotTooltip(s: SessionRecord): string {
+  if (s.errorCount > 0) return `${s.errorCount} error${s.errorCount !== 1 ? 's' : ''}`;
+  if (s.skippedCount > 0) return `${s.skippedCount} skipped`;
+  return 'All files copied successfully';
+}
+
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -21,19 +41,27 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
         <div className="session-empty">No past sessions</div>
       ) : (
         <div className="session-list">
-          {sessions.map((s) => (
-            <div key={s.id} className={`session-item${s.completedWithErrors ? ' session-item-warn' : ''}`}>
-              <div className="session-item-top">
-                <span className="session-source">{shortFileName(s.sourcePath)}</span>
-                <span className="session-date">{formatDate(s.completedAt)}</span>
+          {sessions.map((s) => {
+            const status = getSessionStatus(s);
+            return (
+              <div
+                key={s.id}
+                className={`session-item session-item-${status}`}
+              >
+                <div className="session-item-top">
+                  <span className="session-source">{shortFileName(s.sourcePath)}</span>
+                  <span
+                    className={`session-status-dot session-status-dot-${status}`}
+                    title={dotTooltip(s)}
+                  />
+                </div>
+                <div className="session-item-bottom">
+                  <span className="session-date">{formatDate(s.completedAt)}</span>
+                  <span className="session-stats">{compactStats(s)}</span>
+                </div>
               </div>
-              <div className="session-item-stats">
-                <span className="session-stat session-stat-ok">{s.copiedCount} copied</span>
-                {s.skippedCount > 0 && <span className="session-stat session-stat-dim">{s.skippedCount} skipped</span>}
-                {s.errorCount > 0 && <span className="session-stat session-stat-err">{s.errorCount} errors</span>}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

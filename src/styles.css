@@ -491,21 +491,6 @@ input {
 }
 
 /* Session history */
-.session-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 14px;
-  color: var(--text-dim);
-  font-size: 11px;
-  cursor: default;
-}
-
-.session-item-icon {
-  font-size: 11px;
-  color: var(--text-dim);
-}
-
 .session-empty {
   padding: 6px 14px;
   font-family: var(--font-mono);
@@ -518,45 +503,69 @@ input {
 
 .session-item {
   padding: 6px 14px;
-  cursor: default;
+  cursor: pointer;
   border-left: 2px solid transparent;
   transition: background 0.1s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .session-item:hover { background: var(--bg-panel-alt); }
-.session-item-warn  { border-left-color: var(--orange); }
+
+/* Left accent bar — only shown for warning/error sessions */
+.session-item-error   { border-left-color: var(--red); }
+.session-item-warning { border-left-color: var(--orange); }
 
 .session-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-item-bottom {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 4px;
 }
+
 .session-source {
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 120px;
+  flex: 1;
+  min-width: 0;
 }
+
+.session-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: help;
+}
+.session-status-dot-success { background: var(--accent); }
+.session-status-dot-warning { background: var(--orange); }
+.session-status-dot-error   { background: var(--red); }
+
 .session-date {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-dim);
   flex-shrink: 0;
 }
-.session-item-stats {
-  display: flex;
-  gap: 6px;
-  margin-top: 2px;
-}
-.session-stat {
+
+.session-stats {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  text-align: right;
 }
-.session-stat-ok   { color: var(--green); }
-.session-stat-dim  { color: var(--text-dim); }
-.session-stat-err  { color: var(--red); }
 
 /* Sidebar spacer + footer */
 .sidebar-spacer {
