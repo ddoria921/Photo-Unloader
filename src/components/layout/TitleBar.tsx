@@ -6,6 +6,8 @@ interface TitleBarProps {
   sidebarOpen: boolean;
   inspectorOpen: boolean;
   bottomOpen: boolean;
+  sidebarToggleDisabled?: boolean;
+  inspectorToggleDisabled?: boolean;
   onToggleSidebar: () => void;
   onToggleInspector: () => void;
   onToggleBottom: () => void;
@@ -24,6 +26,8 @@ export function TitleBar({
   sidebarOpen,
   inspectorOpen,
   bottomOpen,
+  sidebarToggleDisabled,
+  inspectorToggleDisabled,
   onToggleSidebar,
   onToggleInspector,
   onToggleBottom,
@@ -58,8 +62,9 @@ export function TitleBar({
           <button
             className={`panel-toggle-btn${sidebarOpen ? ' panel-toggle-btn--active' : ''}`}
             onClick={onToggleSidebar}
+            disabled={sidebarToggleDisabled}
             aria-pressed={sidebarOpen}
-            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+            title={sidebarToggleDisabled ? 'Window too narrow to show sidebar' : sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
           >
             {/* Left sidebar */}
             <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -84,8 +89,9 @@ export function TitleBar({
           <button
             className={`panel-toggle-btn${inspectorOpen ? ' panel-toggle-btn--active' : ''}`}
             onClick={onToggleInspector}
+            disabled={inspectorToggleDisabled}
             aria-pressed={inspectorOpen}
-            title={inspectorOpen ? 'Hide inspector' : 'Show inspector'}
+            title={inspectorToggleDisabled ? 'Window too narrow to show inspector' : inspectorOpen ? 'Hide inspector' : 'Show inspector'}
           >
             {/* Right sidebar */}
             <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">
