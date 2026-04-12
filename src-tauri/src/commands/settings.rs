@@ -18,10 +18,16 @@ pub async fn save_app_settings(
 
 #[tauri::command]
 pub async fn get_sessions(app: AppHandle) -> Result<Vec<SessionRecord>, String> {
+    if cfg!(debug_assertions) {
+        return Ok(Vec::new());
+    }
     config::load_sessions(&app)
 }
 
 #[tauri::command]
 pub async fn save_session(app: AppHandle, record: SessionRecord) -> Result<(), String> {
+    if cfg!(debug_assertions) {
+        return Ok(());
+    }
     config::append_session(&app, record)
 }
