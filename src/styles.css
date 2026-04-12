@@ -423,6 +423,17 @@ input {
   flex-direction: column;
   gap: 8px;
 }
+.dest-section--locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.dest-locked-hint {
+  margin: 6px 14px 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
 
 .dest-field {
   display: flex;

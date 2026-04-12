@@ -66,13 +66,15 @@ function App() {
     onToggleAllFiles,
     sortKey,
     sortDir,
-    excludedFiles
+    excludedFiles,
+    appSettings
   } = state;
 
   const queueCount = scanResult
     ? scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount
     : 0;
   const skippedCount = progressState?.skippedCount ?? importSummary?.skippedCount ?? 0;
+  const destinationLocked = !sourcePath && !appSettings.jpgDestination.trim() && !appSettings.rawDestination.trim();
 
   return (
     <AppShell
@@ -114,6 +116,7 @@ function App() {
         onRawBrowse={onBrowseRawDestination}
         onFilterChange={onFilterChange}
         sessions={state.sessions}
+        destinationLocked={destinationLocked}
       />
 
       <main className="main-area">
