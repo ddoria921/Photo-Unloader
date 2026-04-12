@@ -46,6 +46,7 @@ function App() {
     toasts,
     dismissToast,
     onBrowse,
+    onDropSourcePath,
     onSelectBrowserDirectory,
     onRescan,
     onStartImport,
@@ -144,6 +145,8 @@ function App() {
           sortKey={sortKey}
           sortDir={sortDir}
           excludedFiles={excludedFiles}
+          onBrowse={onBrowse}
+          onDropPath={onDropSourcePath}
           onSortChange={onSortChange}
           onToggleFileExclusion={onToggleFileExclusion}
           onToggleAllFiles={onToggleAllFiles}
