@@ -55,17 +55,17 @@ function withSettingsFallback(source: string, settings: AppSettings): { jpg: str
 
 function statusFromImportStatus(status: ImportFileStatus): FileRowStatus {
   switch (status) {
-    case 'Copied':           return 'copied';
-    case 'RenamedAndCopied': return 'copied';
-    case 'SkippedDuplicate': return 'duplicate';
-    case 'UnsupportedType':  return 'skipped';
-    case 'Error':            return 'error';
+    case 'copied':           return 'copied';
+    case 'renamedAndCopied': return 'copied';
+    case 'skippedDuplicate': return 'duplicate';
+    case 'unsupportedType':  return 'skipped';
+    case 'error':            return 'error';
     default:                 return 'ready';
   }
 }
 
 function prefixFromImportStatus(status: ImportFileStatus): LogPrefix {
-  return status === 'SkippedDuplicate' ? 'DUPE' : 'IMPORT';
+  return status === 'skippedDuplicate' ? 'DUPE' : 'IMPORT';
 }
 
 function getBaseForFile(file: MediaFile, jpgDest: string, rawDest: string): string | null {
@@ -416,8 +416,8 @@ export function useAppState(): AppStateReturn {
         }
 
         const filename = shortFileName(payload.currentFile);
-        const level = payload.status === 'Error' ? 'error'
-          : payload.status === 'SkippedDuplicate' ? 'warn'
+        const level = payload.status === 'error' ? 'error'
+          : payload.status === 'skippedDuplicate' ? 'warn'
           : 'info';
         const prefix = prefixFromImportStatus(payload.status);
         const detail = payload.message ? ` · ${payload.message}` : '';
@@ -476,10 +476,10 @@ export function useAppState(): AppStateReturn {
       });
     } catch (err) {
       setPhase('ready');
-      addLog('error', 'IMPORT', err instanceof Error ? err.message : 'Import failed.');
+      addLog('error', 'IMPORT', err instanceof Error ? err.message : typeof err === 'string' ? err : 'Import failed.');
       showToast({
         title: 'Import failed',
-        description: err instanceof Error ? err.message : 'Unable to start import.',
+        description: err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unable to start import.',
         variant: 'destructive'
       });
     } finally {
