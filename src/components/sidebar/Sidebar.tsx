@@ -30,6 +30,7 @@ interface SidebarProps {
   onRawBrowse: () => void;
   onFilterChange: (filter: FileFilter) => void;
   sessions: SessionRecord[];
+  destinationLocked: boolean;
 }
 
 export function Sidebar({
@@ -55,7 +56,8 @@ export function Sidebar({
   onJpgBrowse,
   onRawBrowse,
   onFilterChange,
-  sessions
+  sessions,
+  destinationLocked
 }: SidebarProps) {
   return (
     <aside className="sidebar">
@@ -82,6 +84,7 @@ export function Sidebar({
         jpgDestination={jpgDestination}
         rawDestination={rawDestination}
         disabled={importing}
+        locked={destinationLocked}
         onJpgChange={onJpgChange}
         onRawChange={onRawChange}
         onJpgBlur={onJpgBlur}

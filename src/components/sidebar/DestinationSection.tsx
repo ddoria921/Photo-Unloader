@@ -6,6 +6,7 @@ interface DestinationSectionProps {
   jpgDestination: string;
   rawDestination: string;
   disabled: boolean;
+  locked: boolean;
   onJpgChange: (value: string) => void;
   onRawChange: (value: string) => void;
   onJpgBlur: () => void;
@@ -63,6 +64,7 @@ export function DestinationSection({
   jpgDestination,
   rawDestination,
   disabled,
+  locked,
   onJpgChange,
   onRawChange,
   onJpgBlur,
@@ -73,12 +75,12 @@ export function DestinationSection({
   return (
     <div className="sidebar-section">
       <span className="sidebar-section-label">Destination</span>
-      <div className="dest-section">
+      <div className={`dest-section${locked ? ' dest-section--locked' : ''}`}>
         <DestField
           label="JPG"
           value={jpgDestination}
           placeholder="Choose folder…"
-          disabled={disabled}
+          disabled={disabled || locked}
           onChange={onJpgChange}
           onBlur={onJpgBlur}
           onBrowse={onJpgBrowse}
@@ -87,12 +89,15 @@ export function DestinationSection({
           label="RAW"
           value={rawDestination}
           placeholder="Choose folder…"
-          disabled={disabled}
+          disabled={disabled || locked}
           onChange={onRawChange}
           onBlur={onRawBlur}
           onBrowse={onRawBrowse}
         />
       </div>
+      {locked && (
+        <p className="dest-locked-hint">Select a source to configure destinations</p>
+      )}
     </div>
   );
 }
