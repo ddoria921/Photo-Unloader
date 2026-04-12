@@ -17,7 +17,6 @@ interface ToolbarProps {
   importing: boolean;
   loading: boolean;
   canStartImport: boolean;
-  showFilters: boolean;
   onRescan: () => void;
   onStartImport: () => void;
   onCancelImport: () => void;
@@ -36,7 +35,6 @@ export function Toolbar({
   importing,
   loading,
   canStartImport,
-  showFilters,
   onRescan,
   onStartImport,
   onCancelImport,
@@ -58,30 +56,26 @@ export function Toolbar({
   };
 
   return (
-    <div className="toolbar">
-      {showFilters && (
-        <>
-          <span className="toolbar-label">Filter</span>
+    <div className="toolbar" data-hidden={phase === 'idle' || undefined}>
+      <span className="toolbar-label">Filter</span>
 
-          <div
-            ref={groupRef}
-            role="tablist"
-            aria-label="File filter"
-            style={{ display: 'contents' }}
-            onKeyDown={handleGroupKeyDown}
-          >
-            <FilterChip label="ALL"    active={activeFilter === 'all'}    onClick={() => onFilterChange('all')} />
-            <FilterChip label="RAW"    active={activeFilter === 'raw'}    onClick={() => onFilterChange('raw')} />
-            <FilterChip label="JPG"    active={activeFilter === 'jpg'}    onClick={() => onFilterChange('jpg')} />
+      <div
+        ref={groupRef}
+        role="tablist"
+        aria-label="File filter"
+        style={{ display: 'contents' }}
+        onKeyDown={handleGroupKeyDown}
+      >
+        <FilterChip label="ALL"    active={activeFilter === 'all'}    onClick={() => onFilterChange('all')} />
+        <FilterChip label="RAW"    active={activeFilter === 'raw'}    onClick={() => onFilterChange('raw')} />
+        <FilterChip label="JPG"    active={activeFilter === 'jpg'}    onClick={() => onFilterChange('jpg')} />
 
-            <div className="toolbar-sep" />
+        <div className="toolbar-sep" />
 
-            <FilterChip label="DUPES"   active={activeFilter === 'dupes'}   onClick={() => onFilterChange('dupes')}  badge={dupesCount}  badgeVariant="amber" />
-            <FilterChip label="NEW"     active={activeFilter === 'new'}     onClick={() => onFilterChange('new')} />
-            <FilterChip label="ERRORS"  active={activeFilter === 'errors'}  onClick={() => onFilterChange('errors')} badge={errorsCount} badgeVariant="red" />
-          </div>
-        </>
-      )}
+        <FilterChip label="DUPES"   active={activeFilter === 'dupes'}   onClick={() => onFilterChange('dupes')}  badge={dupesCount}  badgeVariant="amber" />
+        <FilterChip label="NEW"     active={activeFilter === 'new'}     onClick={() => onFilterChange('new')} />
+        <FilterChip label="ERRORS"  active={activeFilter === 'errors'}  onClick={() => onFilterChange('errors')} badge={errorsCount} badgeVariant="red" />
+      </div>
 
       <div className="toolbar-spacer" />
 
