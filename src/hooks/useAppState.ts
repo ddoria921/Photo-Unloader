@@ -255,7 +255,7 @@ export function useAppState(): AppStateReturn {
     setPhase('idle');
   };
 
-  const runScan = async (source: string) => {
+  const runScan = async (source: string): Promise<boolean> => {
     setLoading(true);
     setPhase('scanning');
     setImportLog([]);
@@ -277,6 +277,7 @@ export function useAppState(): AppStateReturn {
         'SCAN',
         `Found ${result.files.length.toLocaleString()} files · ${formatBytes(result.totalSizeBytes)}`
       );
+      return true;
     } catch (err) {
       showToast({
         title: 'Scan failed',
@@ -284,6 +285,7 @@ export function useAppState(): AppStateReturn {
         variant: 'destructive'
       });
       setPhase('idle');
+      return false;
     } finally {
       setLoading(false);
     }
@@ -292,8 +294,8 @@ export function useAppState(): AppStateReturn {
   const onDropSourcePath = async (path: string) => {
     if (!isTauriRuntime()) return;
     resetScan();
-    setSourcePath(path);
-    await runScan(path);
+    const ok = await runScan(path);
+    if (ok) setSourcePath(path);
   };
 
   const onBrowse = async () => {

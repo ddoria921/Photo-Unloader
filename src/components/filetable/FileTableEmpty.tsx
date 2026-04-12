@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { isTauriRuntime } from '@/lib/commands';
+import { isTauriRuntime, isDirectory } from '@/lib/commands';
 
 interface FileTableEmptyProps {
   scanning?: boolean;
@@ -8,10 +8,20 @@ interface FileTableEmptyProps {
   onDropPath: (path: string) => void;
 }
 
+type DragState = 'idle' | 'valid' | 'invalid';
+
 export function FileTableEmpty({ scanning, onBrowse, onDropPath }: FileTableEmptyProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [dropError, setDropError] = useState<string | null>(null);
+  const [dragState, setDragState] = useState<DragState>('idle');
+  const [isShaking, setIsShaking] = useState(false);
   const dragCounterRef = useRef(0);
+  // Ref so the Tauri drop handler reads current validity without stale closure
+  const dragValidRef = useRef(false);
+
+  const triggerShake = () => {
+    setIsShaking(false);
+    // Force re-trigger if already shaking by flushing first
+    requestAnimationFrame(() => setIsShaking(true));
+  };
 
   // Tauri: window-level drag-drop events
   useEffect(() => {
@@ -22,25 +32,33 @@ export function FileTableEmpty({ scanning, onBrowse, onDropPath }: FileTableEmpt
     getCurrentWindow()
       .onDragDropEvent((event) => {
         const p = event.payload;
-        if (p.type === 'enter' || p.type === 'over') {
-          setIsDragOver(true);
-          setDropError(null);
-        } else if (p.type === 'leave') {
-          setIsDragOver(false);
-        } else if (p.type === 'drop') {
-          setIsDragOver(false);
+        if (p.type === 'enter') {
           const paths = 'paths' in p ? p.paths : [];
           if (paths.length > 0) {
-            onDropPath(paths[0]);
+            isDirectory(paths[0]).then((isDir) => {
+              dragValidRef.current = isDir;
+              setDragState(isDir ? 'valid' : 'invalid');
+            });
+          }
+        } else if (p.type === 'leave') {
+          dragValidRef.current = false;
+          setDragState('idle');
+        } else if (p.type === 'drop') {
+          const wasValid = dragValidRef.current;
+          dragValidRef.current = false;
+          setDragState('idle');
+          if (wasValid) {
+            const paths = 'paths' in p ? p.paths : [];
+            if (paths.length > 0) onDropPath(paths[0]);
+          } else {
+            triggerShake();
           }
         }
       })
       .then((fn) => { unlisten = fn; })
       .catch(() => {});
 
-    return () => {
-      unlisten?.();
-    };
+    return () => { unlisten?.(); };
   }, [scanning, onDropPath]);
 
   // Browser: HTML drag events (counter avoids flicker on child-element transitions)
@@ -48,15 +66,22 @@ export function FileTableEmpty({ scanning, onBrowse, onDropPath }: FileTableEmpt
     if (isTauriRuntime()) return;
     e.preventDefault();
     dragCounterRef.current += 1;
-    setIsDragOver(true);
-    setDropError(null);
+    if (dragCounterRef.current === 1) {
+      const entry = e.dataTransfer.items[0]?.webkitGetAsEntry?.();
+      const isValid = entry?.isDirectory ?? false;
+      dragValidRef.current = isValid;
+      setDragState(isValid ? 'valid' : 'invalid');
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     if (isTauriRuntime()) return;
     e.preventDefault();
     dragCounterRef.current -= 1;
-    if (dragCounterRef.current === 0) setIsDragOver(false);
+    if (dragCounterRef.current === 0) {
+      dragValidRef.current = false;
+      setDragState('idle');
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -68,14 +93,14 @@ export function FileTableEmpty({ scanning, onBrowse, onDropPath }: FileTableEmpt
     if (isTauriRuntime()) return;
     e.preventDefault();
     dragCounterRef.current = 0;
-    setIsDragOver(false);
+    dragValidRef.current = false;
+    setDragState('idle');
 
-    const items = Array.from(e.dataTransfer.items);
-    const entry = items[0]?.webkitGetAsEntry?.();
+    const entry = Array.from(e.dataTransfer.items)[0]?.webkitGetAsEntry?.();
     if (entry?.isDirectory) {
       onBrowse();
     } else {
-      setDropError('Please drop a folder, not individual files.');
+      triggerShake();
     }
   };
 
@@ -89,6 +114,18 @@ export function FileTableEmpty({ scanning, onBrowse, onDropPath }: FileTableEmpt
     );
   }
 
+  const dropZoneClass = [
+    'drop-zone',
+    dragState === 'valid' && 'drop-zone-active',
+    dragState === 'invalid' && 'drop-zone-invalid',
+    isShaking && 'drop-zone-shake',
+  ].filter(Boolean).join(' ');
+
+  const label =
+    dragState === 'valid' ? 'Release to scan' :
+    dragState === 'invalid' ? 'Drop a folder, not individual files' :
+    'Drop your SD card folder here';
+
   return (
     <div
       className="file-table-empty"
@@ -98,21 +135,16 @@ export function FileTableEmpty({ scanning, onBrowse, onDropPath }: FileTableEmpt
       onDrop={handleDrop}
     >
       <div
-        className={`drop-zone${isDragOver ? ' drop-zone-active' : ''}`}
+        className={dropZoneClass}
         role="region"
         aria-label="Source folder drop zone"
+        onAnimationEnd={() => setIsShaking(false)}
       >
         <svg className="drop-zone-icon" width="36" height="36" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M2 5.5C2 4.67 2.67 4 3.5 4H7.38C7.74 4 8.08 4.15 8.32 4.41L9.68 5.59C9.92 5.85 10.26 6 10.62 6H16.5C17.33 6 18 6.67 18 7.5V14.5C18 15.33 17.33 16 16.5 16H3.5C2.67 16 2 15.33 2 14.5V5.5Z" stroke="currentColor" strokeWidth="1.25" strokeLinejoin="round"/>
         </svg>
 
-        <span className="drop-zone-label">
-          {isDragOver ? 'Release to scan' : 'Drop your SD card folder here'}
-        </span>
-
-        {dropError && (
-          <span className="drop-zone-error">{dropError}</span>
-        )}
+        <span className="drop-zone-label">{label}</span>
 
         <button
           className="browse-btn drop-zone-browse-btn"
