@@ -647,6 +647,29 @@ input {
   color: var(--accent);
 }
 
+.filter-chip-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 0 5px;
+  border-radius: 9999px;
+  min-width: 18px;
+  line-height: 1.6;
+}
+
+.filter-chip-badge-amber {
+  background: rgba(232, 197, 71, 0.18);
+  color: #e8c547;
+}
+
+.filter-chip-badge-red {
+  background: rgba(224, 82, 82, 0.18);
+  color: var(--red);
+}
+
 .toolbar-sep {
   width: 1px;
   height: 16px;

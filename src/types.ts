@@ -35,11 +35,11 @@ export interface StartImportRequest {
 }
 
 export type ImportFileStatus =
-  | 'Copied'
-  | 'SkippedDuplicate'
-  | 'RenamedAndCopied'
-  | 'UnsupportedType'
-  | 'Error';
+  | 'copied'
+  | 'skippedDuplicate'
+  | 'renamedAndCopied'
+  | 'unsupportedType'
+  | 'error';
 
 export interface ImportProgressEvent {
   totalFiles: number;
