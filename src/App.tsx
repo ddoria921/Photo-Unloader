@@ -17,7 +17,7 @@ function App() {
   const state = useAppState();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [inspectorOpen, setInspectorOpen] = useState(false);
-  const [bottomOpen, setBottomOpen] = useState(true);
+  const [bottomOpen, setBottomOpen] = useState(false);
 
   const {
     phase,
@@ -74,6 +74,7 @@ function App() {
     : 0;
   const skippedCount = progressState?.skippedCount ?? importSummary?.skippedCount ?? 0;
   const inspectorAvailable = scanResult !== null && fileRows.length > 0;
+  const logAvailable = phase === 'importing' || phase === 'done';
 
   // Auto-select first visible file and open inspector when scan completes; auto-close when source is cleared
   useEffect(() => {
@@ -89,6 +90,15 @@ function App() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inspectorAvailable]);
+
+  // Auto-show log panel when import begins; auto-hide when session is cleared
+  useEffect(() => {
+    if (logAvailable) {
+      setBottomOpen(true);
+    } else {
+      setBottomOpen(false);
+    }
+  }, [logAvailable]);
 
   return (
     <AppShell
