@@ -626,27 +626,31 @@ input {
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border: 1px solid var(--border-bright);
-  border-radius: var(--radius-sm);
+  border: none;
+  border-radius: 6px;
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.1s;
+  transition: background 0.12s ease-out, color 0.12s ease-out;
   background: transparent;
   white-space: nowrap;
   flex-shrink: 0;
+  outline: none;
 }
 
 .filter-chip:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--bg-panel-alt);
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .filter-chip.active {
-  background: var(--accent-dim);
-  border-color: rgba(232, 197, 71, 0.4);
-  color: var(--accent);
+  background: var(--accent);
+  color: #0e0e0f;
 }
 
 .filter-chip-badge {
