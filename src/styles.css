@@ -248,9 +248,10 @@ input {
 
 .sidebar-section-label {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
   text-transform: uppercase;
   padding: 0 14px 8px;
   display: block;
@@ -371,7 +372,7 @@ input {
   border-left-color: var(--accent);
 }
 
-.nav-item.active .nav-item-label { color: var(--accent); }
+.nav-item.active .nav-item-label { color: var(--accent); font-weight: 500; }
 
 .nav-item-icon {
   font-size: 12px;
@@ -384,8 +385,8 @@ input {
 .nav-item.active .nav-item-icon { color: var(--accent); }
 
 .nav-item-label {
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--text-primary);
   flex: 1;
 }
 
@@ -423,10 +424,11 @@ input {
 
 .dest-field-label {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 12px;
+  font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--text-secondary);
 }
 
 .dest-input {
@@ -765,7 +767,7 @@ input {
   background: var(--accent);
   color: #0e0e0f;
   border: none;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -791,7 +793,7 @@ input {
 .ui-button:disabled { opacity: 0.45; cursor: not-allowed; }
 .ui-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.ui-button--default   { background: var(--accent); color: #0e0e0f; font-weight: 600; }
+.ui-button--default   { background: var(--accent); color: #0e0e0f; font-weight: 500; }
 .ui-button--default:hover:not(:disabled) { background: #f0d060; }
 .ui-button--secondary { background: var(--bg-panel-alt); color: var(--text-primary); border: 1px solid var(--border-bright); }
 .ui-button--secondary:hover:not(:disabled) { background: var(--border); }
@@ -983,7 +985,7 @@ input {
   align-items: center;
   font-family: var(--font-mono);
   font-size: 8px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.05em;
   padding: 1px 4px;
   border-radius: var(--radius-sm);
@@ -1192,9 +1194,10 @@ input {
   align-items: center;
   padding: 0 12px;
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -1411,7 +1414,7 @@ input {
 .log-prefix {
   font-family: var(--font-mono);
   font-size: 8px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.06em;
   padding: 1px 4px;
   border-radius: var(--radius-sm);
@@ -1459,9 +1462,10 @@ input {
 
 .progress-col-header {
   font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -1482,16 +1486,17 @@ input {
 
 .stat-box-value {
   font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
   color: var(--text-primary);
   line-height: 1.1;
 }
 
 .stat-box-label {
   font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.1em;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-dim);
   margin-top: 2px;
@@ -1604,7 +1609,7 @@ input {
   background: var(--accent);
   color: #0e0e0f;
   border-color: transparent;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .progress-action-btn-primary:hover {
@@ -1652,7 +1657,7 @@ input {
   margin: 0;
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.03em;
 }
 
