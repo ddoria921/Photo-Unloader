@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isTauriRuntime } from '@/lib/commands';
 import { useAppState } from '@/hooks/useAppState';
 
@@ -16,7 +16,7 @@ import { Toaster } from '@/components/ui/toaster';
 function App() {
   const state = useAppState();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const [bottomOpen, setBottomOpen] = useState(true);
 
   const {
@@ -73,6 +73,16 @@ function App() {
     ? scanResult.jpgCount + scanResult.rawCount + scanResult.videoCount
     : 0;
   const skippedCount = progressState?.skippedCount ?? importSummary?.skippedCount ?? 0;
+  const inspectorAvailable = scanResult !== null && fileRows.length > 0;
+
+  // Auto-open inspector when scan completes; auto-close when source is cleared
+  useEffect(() => {
+    if (inspectorAvailable) {
+      setInspectorOpen(true);
+    } else {
+      setInspectorOpen(false);
+    }
+  }, [inspectorAvailable]);
 
   return (
     <AppShell
@@ -84,6 +94,7 @@ function App() {
         isConnected={IS_TAURI}
         sidebarOpen={sidebarOpen}
         inspectorOpen={inspectorOpen}
+        inspectorAvailable={inspectorAvailable}
         bottomOpen={bottomOpen}
         onToggleSidebar={() => setSidebarOpen((v) => !v)}
         onToggleInspector={() => setInspectorOpen((v) => !v)}
