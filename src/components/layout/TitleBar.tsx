@@ -5,7 +5,6 @@ interface TitleBarProps {
   isConnected: boolean;
   sidebarOpen: boolean;
   inspectorOpen: boolean;
-  inspectorAvailable: boolean;
   bottomOpen: boolean;
   onToggleSidebar: () => void;
   onToggleInspector: () => void;
@@ -24,7 +23,6 @@ export function TitleBar({
   isConnected,
   sidebarOpen,
   inspectorOpen,
-  inspectorAvailable,
   bottomOpen,
   onToggleSidebar,
   onToggleInspector,
@@ -86,9 +84,8 @@ export function TitleBar({
           <button
             className={`panel-toggle-btn${inspectorOpen ? ' panel-toggle-btn--active' : ''}`}
             onClick={onToggleInspector}
-            disabled={!inspectorAvailable}
             aria-pressed={inspectorOpen}
-            title={inspectorAvailable ? (inspectorOpen ? 'Hide inspector' : 'Show inspector') : 'Inspector unavailable until a folder is scanned'}
+            title={inspectorOpen ? 'Hide inspector' : 'Show inspector'}
           >
             {/* Right sidebar */}
             <svg width="16" height="14" viewBox="0 0 16 14" fill="none" xmlns="http://www.w3.org/2000/svg">

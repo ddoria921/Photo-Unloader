@@ -75,13 +75,19 @@ function App() {
   const skippedCount = progressState?.skippedCount ?? importSummary?.skippedCount ?? 0;
   const inspectorAvailable = scanResult !== null && fileRows.length > 0;
 
-  // Auto-open inspector when scan completes; auto-close when source is cleared
+  // Auto-select first visible file and open inspector when scan completes; auto-close when source is cleared
   useEffect(() => {
     if (inspectorAvailable) {
+      const firstRow = filteredRows[0];
+      if (firstRow) {
+        const realIdx = fileRows.indexOf(firstRow);
+        if (realIdx !== -1) onSelectFile(realIdx);
+      }
       setInspectorOpen(true);
     } else {
       setInspectorOpen(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inspectorAvailable]);
 
   return (
@@ -94,7 +100,6 @@ function App() {
         isConnected={IS_TAURI}
         sidebarOpen={sidebarOpen}
         inspectorOpen={inspectorOpen}
-        inspectorAvailable={inspectorAvailable}
         bottomOpen={bottomOpen}
         onToggleSidebar={() => setSidebarOpen((v) => !v)}
         onToggleInspector={() => setInspectorOpen((v) => !v)}
