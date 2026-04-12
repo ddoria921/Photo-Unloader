@@ -274,15 +274,36 @@ input {
   padding: 10px;
 }
 
+.device-source-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+.device-source-reset {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.1s;
+}
+.device-source-reset:hover:not(:disabled) { color: var(--red); }
+.device-source-reset:disabled { opacity: 0.4; cursor: not-allowed; }
+
 .device-name {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .device-meta {
@@ -1113,8 +1134,12 @@ input {
   border: 1.5px dashed var(--text-dim);
   border-radius: 12px;
   padding: 40px 24px;
-  cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
+}
+.drop-zone-browse-btn {
+  width: auto;
+  margin-top: 6px;
+  padding: 6px 16px;
 }
 
 .drop-zone:hover {

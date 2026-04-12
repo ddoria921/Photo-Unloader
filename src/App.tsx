@@ -46,6 +46,7 @@ function App() {
     toasts,
     dismissToast,
     onBrowse,
+    onReset,
     onDropSourcePath,
     onSelectBrowserDirectory,
     onRescan,
@@ -105,6 +106,7 @@ function App() {
         errorCount={errorCount}
         fileInputRef={fileInputRef}
         onBrowse={onBrowse}
+        onReset={onReset}
         onSelectBrowserDirectory={onSelectBrowserDirectory}
         onJpgChange={onJpgDestinationChange}
         onRawChange={onRawDestinationChange}

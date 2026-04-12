@@ -21,6 +21,7 @@ interface SidebarProps {
   errorCount: number;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onBrowse: () => void;
+  onReset: () => void;
   onSelectBrowserDirectory: (event: ChangeEvent<HTMLInputElement>) => void;
   onJpgChange: (value: string) => void;
   onRawChange: (value: string) => void;
@@ -47,6 +48,7 @@ export function Sidebar({
   errorCount,
   fileInputRef,
   onBrowse,
+  onReset,
   onSelectBrowserDirectory,
   onJpgChange,
   onRawChange,
@@ -66,6 +68,7 @@ export function Sidebar({
         loading={loading}
         fileInputRef={fileInputRef}
         onBrowse={onBrowse}
+        onReset={onReset}
         onSelectBrowserDirectory={onSelectBrowserDirectory}
       />
 

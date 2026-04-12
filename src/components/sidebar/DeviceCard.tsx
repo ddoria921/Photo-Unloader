@@ -9,6 +9,7 @@ interface DeviceCardProps {
   loading: boolean;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onBrowse: () => void;
+  onReset: () => void;
   onSelectBrowserDirectory: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -18,7 +19,7 @@ export function DeviceCard({
   phase,
   loading,
   fileInputRef,
-  onBrowse,
+  onReset,
   onSelectBrowserDirectory
 }: DeviceCardProps) {
   const hasSource = !!sourcePath;
@@ -29,7 +30,18 @@ export function DeviceCard({
 
       {hasSource ? (
         <div className="device-card">
-          <div className="device-name">{shortFileName(sourcePath)}</div>
+          <div className="device-source-row">
+            <div className="device-name">{shortFileName(sourcePath)}</div>
+            <button
+              className="device-source-reset"
+              onClick={onReset}
+              disabled={loading || phase === 'importing'}
+              title="Clear source"
+              aria-label="Clear source"
+            >
+              ×
+            </button>
+          </div>
           <div className="device-meta">{sourcePath}</div>
           {scanResult && (
             <div className="device-meta">
@@ -41,26 +53,10 @@ export function DeviceCard({
               <div className="device-bar-fill" style={{ width: '62%' }} />
             </div>
           )}
-          <button
-            className="browse-btn"
-            onClick={onBrowse}
-            disabled={loading || phase === 'importing'}
-            style={{ marginTop: '8px' }}
-          >
-            {loading ? 'Scanning…' : '⟳ Rescan / Change'}
-          </button>
         </div>
       ) : (
         <div className="device-card-empty">
           <span className="device-card-empty-label">No source selected</span>
-          <button
-            className="browse-btn"
-            onClick={onBrowse}
-            disabled={loading}
-            style={{ marginTop: 0 }}
-          >
-            {loading ? 'Scanning…' : '⊕ Browse Folder'}
-          </button>
         </div>
       )}
 
