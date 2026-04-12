@@ -130,6 +130,7 @@ function App() {
           importing={importing}
           loading={loading}
           canStartImport={canStartImport}
+          showFilters={scanResult !== null && fileRows.length > 0}
           onRescan={onRescan}
           onStartImport={onStartImport}
           onCancelImport={onCancelImport}
