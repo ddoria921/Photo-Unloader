@@ -56,7 +56,7 @@ export function Toolbar({
   };
 
   return (
-    <div className="toolbar">
+    <div className="toolbar" data-hidden={phase === 'idle' || undefined}>
       <span className="toolbar-label">Filter</span>
 
       <div

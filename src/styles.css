@@ -618,6 +618,13 @@ input {
   overflow: hidden;
 }
 
+.toolbar[data-hidden] {
+  height: 0;
+  opacity: 0;
+  border-bottom-color: transparent;
+  pointer-events: none;
+}
+
 .toolbar-label {
   font-family: var(--font-mono);
   font-size: 9px;
