@@ -256,10 +256,10 @@ input {
 
 .sidebar-section-label {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 9px;
+  font-weight: 400;
   letter-spacing: 0.1em;
-  color: var(--text-secondary);
+  color: var(--text-dim);
   text-transform: uppercase;
   padding: 0 14px 8px;
   display: block;
