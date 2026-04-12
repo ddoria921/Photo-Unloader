@@ -92,8 +92,6 @@ export function Sidebar({
 
       <SessionHistory sessions={sessions} />
 
-      <div className="sidebar-spacer" />
-
       <SidebarFooter />
     </aside>
   );
