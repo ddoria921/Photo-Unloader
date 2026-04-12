@@ -12,6 +12,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .manage(commands::import::ImportCancelToken(Arc::new(AtomicBool::new(false))))
         .invoke_handler(tauri::generate_handler![
+            commands::is_directory,
             commands::scan::scan_card,
             commands::import::start_import,
             commands::import::cancel_import,

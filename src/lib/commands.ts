@@ -49,6 +49,10 @@ export function isTauriRuntime(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
+export async function isDirectory(path: string): Promise<boolean> {
+  return invoke<boolean>('is_directory', { path });
+}
+
 export function scanFilesInBrowser(files: File[]): ScanResult {
   const scannedFiles: MediaFile[] = [];
   let jpgCount = 0;
