@@ -246,6 +246,14 @@ input {
   flex-shrink: 0;
 }
 
+.sidebar-section-sessions {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .sidebar-section-label {
   font-family: var(--font-mono);
   font-size: 9px;
@@ -499,7 +507,7 @@ input {
   font-style: italic;
 }
 
-.session-list { display: flex; flex-direction: column; gap: 1px; }
+.session-list { display: flex; flex-direction: column; gap: 1px; overflow-y: auto; flex: 1; min-height: 0; }
 
 .session-item {
   padding: 6px 14px;
@@ -524,10 +532,7 @@ input {
 }
 
 .session-item-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 4px;
+  overflow: hidden;
 }
 
 .session-source {
@@ -552,19 +557,14 @@ input {
 .session-status-dot-warning { background: var(--orange); }
 .session-status-dot-error   { background: var(--red); }
 
-.session-date {
+.session-meta {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-dim);
-  flex-shrink: 0;
-}
-
-.session-stats {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-  text-align: right;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Sidebar spacer + footer */

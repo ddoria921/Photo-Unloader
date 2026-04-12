@@ -13,16 +13,12 @@ function getSessionStatus(s: SessionRecord): SessionStatus {
   return 'success';
 }
 
-function compactStats(s: SessionRecord): string {
-  if (s.errorCount > 0) return `${s.copiedCount} copied · ${s.errorCount} error${s.errorCount !== 1 ? 's' : ''}`;
-  if (s.skippedCount > 0) return `${s.copiedCount} copied · ${s.skippedCount} skipped`;
-  return `${s.copiedCount} copied`;
-}
-
-function dotTooltip(s: SessionRecord): string {
-  if (s.errorCount > 0) return `${s.errorCount} error${s.errorCount !== 1 ? 's' : ''}`;
-  if (s.skippedCount > 0) return `${s.skippedCount} skipped`;
-  return 'All files copied successfully';
+function combinedMeta(s: SessionRecord): string {
+  const parts: string[] = [formatDate(s.completedAt)];
+  if (s.copiedCount > 0) parts.push(`${s.copiedCount} copied`);
+  if (s.skippedCount > 0) parts.push(`${s.skippedCount} dupes`);
+  if (s.errorCount > 0) parts.push(`${s.errorCount} error${s.errorCount !== 1 ? 's' : ''}`);
+  return parts.join(' · ');
 }
 
 function formatDate(iso: string): string {
@@ -35,7 +31,7 @@ function formatDate(iso: string): string {
 
 export function SessionHistory({ sessions }: SessionHistoryProps) {
   return (
-    <div className="sidebar-section" style={{ borderBottom: 'none' }}>
+    <div className="sidebar-section sidebar-section-sessions" style={{ borderBottom: 'none' }}>
       <span className="sidebar-section-label">Sessions</span>
       {sessions.length === 0 ? (
         <div className="session-empty">No past sessions</div>
@@ -50,14 +46,10 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
               >
                 <div className="session-item-top">
                   <span className="session-source">{shortFileName(s.sourcePath)}</span>
-                  <span
-                    className={`session-status-dot session-status-dot-${status}`}
-                    title={dotTooltip(s)}
-                  />
+                  <span className={`session-status-dot session-status-dot-${status}`} />
                 </div>
                 <div className="session-item-bottom">
-                  <span className="session-date">{formatDate(s.completedAt)}</span>
-                  <span className="session-stats">{compactStats(s)}</span>
+                  <span className="session-meta">{combinedMeta(s)}</span>
                 </div>
               </div>
             );
