@@ -30,32 +30,30 @@ function formatDate(iso: string): string {
 }
 
 export function SessionHistory({ sessions }: SessionHistoryProps) {
+  if (sessions.length === 0) return null;
+
   return (
     <div className="sidebar-section sidebar-section-sessions" style={{ borderBottom: 'none' }}>
       <span className="sidebar-section-label">Sessions</span>
-      {sessions.length === 0 ? (
-        <div className="session-empty">No past sessions</div>
-      ) : (
-        <div className="session-list">
-          {sessions.map((s) => {
-            const status = getSessionStatus(s);
-            return (
-              <div
-                key={s.id}
-                className={`session-item session-item-${status}`}
-              >
-                <div className="session-item-top">
-                  <span className="session-source">{shortFileName(s.sourcePath)}</span>
-                  <span className={`session-status-dot session-status-dot-${status}`} />
-                </div>
-                <div className="session-item-bottom">
-                  <span className="session-meta">{combinedMeta(s)}</span>
-                </div>
+      <div className="session-list">
+        {sessions.map((s) => {
+          const status = getSessionStatus(s);
+          return (
+            <div
+              key={s.id}
+              className={`session-item session-item-${status}`}
+            >
+              <div className="session-item-top">
+                <span className="session-source">{shortFileName(s.sourcePath)}</span>
+                <span className={`session-status-dot session-status-dot-${status}`} />
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div className="session-item-bottom">
+                <span className="session-meta">{combinedMeta(s)}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
