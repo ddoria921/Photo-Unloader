@@ -93,7 +93,10 @@ pub fn scan_directory(source_dir: &Path) -> io::Result<ScanResult> {
             FileType::Jpg => jpg_count += 1,
             FileType::Raw => raw_count += 1,
             FileType::Video => video_count += 1,
-            FileType::Unknown => unknown_count += 1,
+            FileType::Unknown => {
+                unknown_count += 1;
+                continue;
+            }
         }
 
         total_size_bytes += metadata.len();
@@ -206,5 +209,25 @@ mod tests {
             classify_file_type(Path::new("a.xyz")),
             FileType::Unknown
         ));
+    }
+
+    #[test]
+    fn scan_excludes_unknown_file_types() {
+        use std::fs;
+        let dir = std::env::temp_dir().join("photo_unloader_test_scan_unknown");
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(dir.join("photo.jpg"), b"fake").unwrap();
+        fs::write(dir.join("debug.log"), b"log data").unwrap();
+        fs::write(dir.join("readme.txt"), b"text").unwrap();
+
+        let result = scan_directory(&dir).unwrap();
+
+        // Cleanup
+        let _ = fs::remove_dir_all(&dir);
+
+        assert_eq!(result.files.len(), 1, "only the JPG should be included");
+        assert_eq!(result.files[0].filename, "photo.jpg");
+        assert_eq!(result.unknown_count, 2, "log and txt should be counted as unknown");
+        assert_eq!(result.jpg_count, 1);
     }
 }

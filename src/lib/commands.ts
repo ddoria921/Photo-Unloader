@@ -68,6 +68,12 @@ export function scanFilesInBrowser(files: File[]): ScanResult {
     }
 
     const fileType = classifyFileType(file.name);
+
+    if (fileType === 'unknown') {
+      unknownCount += 1;
+      continue;
+    }
+
     totalSizeBytes += file.size;
 
     switch (fileType) {
@@ -79,9 +85,6 @@ export function scanFilesInBrowser(files: File[]): ScanResult {
         break;
       case 'video':
         videoCount += 1;
-        break;
-      default:
-        unknownCount += 1;
         break;
     }
 
